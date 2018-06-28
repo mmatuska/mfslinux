@@ -155,7 +155,18 @@ endif
 	@$(TOUCH) $(WRKDIR)/.remove_packages_done
 
 download_packages:
-	@if [ -f "$(OPENWRT_PACKAGES_ADD)" ]; then \
+	@if [ -f "$(OPENWRT_TARGET_PACKAGES_ADD)" ]; then \
+	  PACKAGES_ADD=`$(CAT) $(OPENWRT_TARGET_PACKAGES_ADD)`; \
+	else \
+	  PACKAGES_ADD=`$(CAT) $(CONFIGDIR)/default/openwrt_target_packages_add`; \
+	fi; \
+	for PKG in $$PACKAGES_ADD; do \
+	if [ ! -f $(DOWNLOADDIR)/$${PKG} ]; then \
+	echo "Downloading: $${PKG}"; \
+	cd $(DOWNLOADDIR) && $(WGET) $(OPENWRT_TARGET_URL)/packages/$${PKG}; \
+	fi; \
+	done; \
+	if [ -f "$(OPENWRT_PACKAGES_ADD)" ]; then \
 	  PACKAGES_ADD=`$(CAT) $(OPENWRT_PACKAGES_ADD)`; \
 	else \
 	  PACKAGES_ADD=`$(CAT) $(CONFIGDIR)/default/openwrt_packages_add`; \
@@ -165,17 +176,6 @@ download_packages:
 	if [ ! -f $(DOWNLOADDIR)/$${PKGNAME} ]; then \
 	echo "Downloading: $${PKG}"; \
 	cd $(DOWNLOADDIR) && $(WGET) $(OPENWRT_PACKAGES_URL)/$${PKG}; \
-	fi; \
-	done; \
-	if [ -f "$(OPENWRT_TARGET_PACKAGES_ADD)" ]; then \
-	  PACKAGES_ADD=`$(CAT) $(OPENWRT_TARGET_PACKAGES_ADD)`; \
-	else \
-	  PACKAGES_ADD=`$(CAT) $(CONFIGDIR)/default/openwrt_target_packages_add`; \
-	fi; \
-	for PKG in $$PACKAGES_ADD; do \
-	if [ ! -f $(DOWNLOADDIR)/$${PKG} ]; then \
-	echo "Downloading: $${PKG}"; \
-	cd $(DOWNLOADDIR) && $(WGET) $(OPENWRT_TARGET_URL)/packages/$${PKG}; \
 	fi; \
 	done
 

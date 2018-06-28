@@ -6,14 +6,14 @@ base/zlib_1.2.11-2_x86_64.ipk
 base/libopenssl_1.0.2o-1_x86_64.ipk
 base/libustream-openssl_2018-04-30-527e7002-3_x86_64.ipk
 base/ca-certificates_20180409_all.ipk
+base/libfdisk_2.32-2_x86_64.ipk
+base/libmount_2.32-2_x86_64.ipk
 base/fdisk_2.32-2_x86_64.ipk
+base/cfdisk_2.32-2_x86_64.ipk
 base/libevent2_2.0.22-1_x86_64.ipk
 base/libpopt_1.16-1_x86_64.ipk
 base/libpcap_1.8.1-1_x86_64.ipk
 base/tcpdump_4.9.2-1_x86_64.ipk
-base/libfdisk_2.32-2_x86_64.ipk
-base/fdisk_2.32-2_x86_64.ipk
-base/cfdisk_2.32-2_x86_64.ipk
 base/xfs-mkfs_4.11.0-2_x86_64.ipk
 base/xfs-growfs_4.11.0-2_x86_64.ipk
 base/xfs-fsck_4.11.0-2_x86_64.ipk
