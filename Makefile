@@ -22,6 +22,7 @@ MKISOFS?=	$(shell which mkisofs)
 OPENSSL?=	$(shell which openssl)
 CHROOT?=	$(shell which chroot)
 TOUCH?=		$(shell which touch)
+GIT?=		$(shell which git)
 
 CURDIR?=	$(shell pwd)
 CONFIGDIR?=	$(CURDIR)/config
@@ -34,9 +35,48 @@ OPENWRT_ROOTDIR?=	$(WRKDIR)/openwrt_root
 OPENWRT_IMGDIR?=	$(WRKDIR)/openwrt_root_img
 OPENWRT_ROOT_TAR?=	$(WRKDIR)/openwrt_root.tar
 
-OPENWRT_DOWNLOAD_URL=	https://downloads.openwrt.org/releases/18.06.0-rc1/targets/x86/64/
+OPENWRT_TARGET_URL=	https://downloads.openwrt.org/releases/18.06.0-rc1/targets/x86/64/
+OPENWRT_PACKAGES_URL=	http://downloads.openwrt.org/releases/18.06.0-rc1/packages/x86_64/
 OPENWRT_ROOTFS_IMAGE=	openwrt-18.06.0-rc1-x86-64-rootfs-ext4.img
 OPENWRT_KERNEL=		openwrt-18.06.0-rc1-x86-64-vmlinuz
+
+OPENWRT_PACKAGES_REMOVE=	luci \
+				luci-theme-bootstrap \
+				luci-proto-ppp \
+				luci-proto-ipv6 \
+				luci-mod-admin-full \
+				luci-app-firewall \
+				luci-base \
+				luci-lib-ip \
+				luci-lib-jsonc \
+				luci-lib-nixio \
+				dnsmasq \
+				uhttpd-mod-ubus \
+				uhttpd \
+				liblucihttp-lua \
+				liblucihttp
+
+OPENWRT_PACKAGES_ADD=		base/uclibcxx_0.2.4-3_x86_64.ipk \
+				base/terminfo_6.1-1_x86_64.ipk \
+				base/libreadline_7.0-1_x86_64.ipk \
+				base/libncurses_6.1-1_x86_64.ipk \
+				base/zlib_1.2.11-2_x86_64.ipk \
+				base/libopenssl_1.0.2o-1_x86_64.ipk \
+				base/libustream-openssl_2018-04-30-527e7002-3_x86_64.ipk \
+				base/ca-certificates_20180409_all.ipk \
+				base/libevent2_2.0.22-1_x86_64.ipk \
+				base/libpopt_1.16-1_x86_64.ipk \
+				base/libpcap_1.8.1-1_x86_64.ipk \
+				base/tcpdump_4.9.2-1_x86_64.ipk \
+				packages/atftp_0.7.1-5_x86_64.ipk \
+				packages/libunbound_1.7.3-2_x86_64.ipk \
+				packages/unbound-host_1.7.3-2_x86_64.ipk \
+				packages/dmidecode_3.1-1_x86_64.ipk \
+				packages/less_487-1_x86_64.ipk \
+				packages/smartmontools_6.6-1_x86_64.ipk \
+				packages/rsync_3.1.3-1_x86_64.ipk \
+				packages/tmux_2.7-1_x86_64.ipk \
+				packages/ipmitool_1.8.18-1_x86_64.ipk
 
 CONFIGFILES=	network system
 ISOLINUX_CFG=	$(ISOLINUXDIR)/isolinux.cfg
@@ -63,12 +103,12 @@ download_rootfs_image: $(DOWNLOADDIR) $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE)
 
 $(DOWNLOADDIR)/$(OPENWRT_KERNEL):
 	@echo "Downloading OpenWRT kernel"
-	@cd $(DOWNLOADDIR) && $(WGET) $(OPENWRT_DOWNLOAD_URL)/$(OPENWRT_KERNEL)
+	@cd $(DOWNLOADDIR) && $(WGET) $(OPENWRT_TARGET_URL)/$(OPENWRT_KERNEL)
 
 # Download and extract rootfs image
 $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE):
 	@echo "Downloading OpenWRT rootfs image"
-	@cd $(DOWNLOADDIR) && $(WGET) $(OPENWRT_DOWNLOAD_URL)/$(OPENWRT_ROOTFS_IMAGE).gz
+	@cd $(DOWNLOADDIR) && $(WGET) $(OPENWRT_TARGET_URL)/$(OPENWRT_ROOTFS_IMAGE).gz
 	@echo "Extracting OpenWRT rootfs image"
 	@cd $(DOWNLOADDIR) && $(GZIP) -d $(OPENWRT_ROOTFS_IMAGE).gz
 
@@ -106,14 +146,69 @@ $(WRKDIR)/.rootpw_done:
 	$(SED) -i -e "s,root:[^:]*,root:$$ROOTPW_HASH,g" $(OPENWRT_ROOTDIR)/etc/shadow
 	@$(TOUCH) $(WRKDIR)/.rootpw_done
 
+remove_packages: $(WRKDIR)/.remove_packages_done
+
+$(WRKDIR)/.remove_packages_done:
+	@echo "Removing packages"
+	@$(MKDIR) -p $(OPENWRT_ROOTDIR)/tmp/lock
+	@$(CHROOT) $(OPENWRT_ROOTDIR) opkg remove $(OPENWRT_PACKAGES_REMOVE)
+	@$(TOUCH) $(WRKDIR)/.remove_packages_done
+
+download_packages:
+	@for PKG in $(OPENWRT_PACKAGES_ADD); do \
+	PKGNAME=`basename $$PKG`; \
+	if [ ! -f $(DOWNLOADDIR)/$${PKGNAME} ]; then \
+	echo "Downloading: $${PKG}"; \
+	cd $(DOWNLOADDIR) && $(WGET) $(OPENWRT_PACKAGES_URL)/$${PKG}; \
+	fi; \
+	done
+
+add_packages: download_packages $(WRKDIR)/.add_packages_done
+
+$(WRKDIR)/.add_packages_done:
+	@$(MKDIR) -p $(OPENWRT_ROOTDIR)/packages
+	@for PKG in $(OPENWRT_PACKAGES_ADD); do \
+	PKGNAME=`basename $$PKG`; \
+	$(CP) $(DOWNLOADDIR)/$$PKGNAME $(OPENWRT_ROOTDIR)/packages; \
+	$(CHROOT) $(OPENWRT_ROOTDIR) opkg install /packages/$$PKGNAME; \
+	done
+	@$(RM) -rf $(OPENWRT_ROOTDIR)/packages
+	@$(TOUCH) $(WRKDIR)/.add_packages_done
+
 copy_configuration_files: $(WRKDIR)/.copy_configuration_files_done
 
 $(WRKDIR)/.copy_configuration_files_done:
 	@echo "Coypying configuration files"
 	@for FILE in $(CONFIGFILES); do \
-	$(CP) -f $(CONFIGDIR)/$$FILE $(WRKDIR)/openwrt_root/etc/config/; \
+	if [ -f $(CONFIGDIR)/$$FILE ]; then \
+		$(CP) -f $(CONFIGDIR)/$$FILE $(WRKDIR)/openwrt_root/etc/config/$$FILE; \
+	elif [ -f $(CONFIGDIR)/$$FILE.sample ]; then \
+		$(CP) -f $(CONFIGDIR)/$$FILE.sample $(WRKDIR)/openwrt_root/etc/config/$$FILE; \
+	else \
+		echo "Missing configuration file: $(CONFIGDIR)/$$FILE"; \
+		exit 1; \
+	fi; \
 	done
 	@$(TOUCH) $(WRKDIR)/.copy_configuration_files_done
+
+host_key: $(WRKDIR)/.host_key_done
+
+$(WRKDIR)/.host_key_done:
+	@if [ -f $(CONFIGDIR)/dropbear_rsa_host_key ]; then \
+	echo "Installing dropbear_rsa_host_key"; \
+	$(CP) -f $(CONFIGDIR)/dropbear_rsa_host_key \
+	  $(OPENWRT_ROOTDIR)/etc/dropbear/dropbear_rsa_host_key; \
+	fi
+	@$(TOUCH) $(WRKDIR)/.host_key_done
+
+banner: $(WRKDIR)/.banner_done
+
+$(WRKDIR)/.banner_done:
+	@echo "Appending mfslinux info to OpenWRT banner"
+	@echo " mfslinux `$(GIT) rev-parse --short HEAD`" >> $(OPENWRT_ROOTDIR)/etc/banner
+	@echo " -----------------------------------------------------" >> \
+		$(OPENWRT_ROOTDIR)/etc/banner
+	@$(TOUCH) $(WRKDIR)/.banner_done
 
 $(ISODIR)/isolinux/initramfs.igz: 
 	@echo "Generating initramfs"
@@ -138,7 +233,7 @@ $(WRKDIR)/.copy_isolinux_files_done:
 	@$(CP) -f $(ISOLINUX_BOOTTXT) $(ISODIR)/isolinux/boot.txt
 	@$(TOUCH) $(WRKDIR)/.copy_isolinux_files_done
 
-customize_rootfs: copy_configuration_files set_rootpw
+customize_rootfs: remove_packages add_packages copy_configuration_files set_rootpw host_key banner
 
 generate_initramfs: download_rootfs_image extract_rootfs customize_rootfs $(ISODIR)/isolinux/initramfs.igz
 
