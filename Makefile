@@ -186,10 +186,15 @@ ifeq ($(BUILD_OS),FreeBSD)
 	@echo "Adding new OpenWRT packages not supported on FreeBSD"
 else
 	@$(MKDIR) -p $(OPENWRT_ROOTDIR)/packages
-	@if [ -f $(OPENWRT_PACKAGES_ADD) ]; then \
-	  PACKAGES_ADD=`$(CAT) $(OPENWRT_PACKAGES_ADD)`; \
+	@if [ -f $(OPENWRT_TARGET_PACKAGES_ADD) ]; then \
+	  PACKAGES_ADD=`$(CAT) $(OPENWRT_TARGET_PACKAGES_ADD)`; \
 	else \
-	  PACKAGES_ADD=`$(CAT) $(CONFIGDIR)/default/openwrt_packages_add`; \
+	  PACKAGES_ADD=`$(CAT) $(CONFIGDIR)/default/openwrt_target_packages_add`; \
+	fi; \
+	if [ -f $(OPENWRT_PACKAGES_ADD) ]; then \
+	  PACKAGES_ADD="$$PACKAGES_ADD `$(CAT) $(OPENWRT_PACKAGES_ADD)`"; \
+	else \
+	  PACKAGES_ADD="$$PACKAGES_ADD `$(CAT) $(CONFIGDIR)/default/openwrt_packages_add`"; \
 	fi; \
 	for PKG in $$PACKAGES_ADD; do \
 	PKGNAME=`basename $$PKG`; \

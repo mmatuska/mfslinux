@@ -10,4 +10,7 @@ kmod-dnsresolver_4.14.50-1_x86_64.ipk
 kmod-fs-nfs_4.14.50-1_x86_64.ipk
 kmod-fs-nfs-v3_4.14.50-1_x86_64.ipk
 kmod-fs-nfs-v4_4.14.50-1_x86_64.ipk
+kmod-fs-exportfs_4.14.50-1_x86_64.ipk
+kmod-crypto-crc32c_4.14.50-1_x86_64.ipk
+kmod-lib-crc32c_4.14.50-1_x86_64.ipk
 kmod-fs-xfs_4.14.50-1_x86_64.ipk
