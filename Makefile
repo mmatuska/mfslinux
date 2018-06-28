@@ -149,7 +149,7 @@ else
 	else \
 	  PACKAGES_REMOVE=`$(CAT) $(CONFIGDIR)/default/openwrt_packages_remove`; \
 	fi; \
-	  $(CHROOT) $(OPENWRT_ROOTDIR) opkg remove $$PACKAGES_REMOVE
+	  $(CHROOT) $(OPENWRT_ROOTDIR) env PATH="/usr/sbin:/usr/bin:/sbin:/bin" opkg remove $$PACKAGES_REMOVE
 endif
 	@$(TOUCH) $(WRKDIR)/.remove_packages_done
 
@@ -182,7 +182,7 @@ else
 	for PKG in $$PACKAGES_ADD; do \
 	PKGNAME=`basename $$PKG`; \
 	$(CP) $(DOWNLOADDIR)/$$PKGNAME $(OPENWRT_ROOTDIR)/packages; \
-	$(CHROOT) $(OPENWRT_ROOTDIR) opkg install /packages/$$PKGNAME; \
+	$(CHROOT) $(OPENWRT_ROOTDIR) env PATH="/usr/sbin:/usr/bin:/sbin:/bin" opkg install /packages/$$PKGNAME; \
 	done
 	@$(RM) -rf $(OPENWRT_ROOTDIR)/packages
 endif
