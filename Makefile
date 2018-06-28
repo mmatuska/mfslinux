@@ -42,7 +42,6 @@ ISODIR?=	$(WRKDIR)/iso
 
 OPENWRT_ROOTDIR?=	$(WRKDIR)/openwrt_root
 OPENWRT_IMGDIR?=	$(WRKDIR)/openwrt_root_img
-OPENWRT_ROOT_TAR?=	$(WRKDIR)/openwrt_root.tar
 
 OPENWRT_TARGET_URL=	https://downloads.openwrt.org/releases/18.06.0-rc1/targets/x86/64/
 OPENWRT_PACKAGES_URL=	http://downloads.openwrt.org/releases/18.06.0-rc1/packages/x86_64/
@@ -51,6 +50,7 @@ OPENWRT_KERNEL=		openwrt-18.06.0-rc1-x86-64-vmlinuz
 
 OPENWRT_PACKAGES_REMOVE?=	$(CONFIGDIR)/openwrt_packages_remove
 OPENWRT_PACKAGES_ADD?=		$(CONFIGDIR)/openwrt_packages_add
+OPENWRT_ROOT_TAR?=	$(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE).tar
 
 CONFIGFILES=	network system
 ISOLINUX_CFG=	$(ISOLINUXDIR)/isolinux.cfg
@@ -91,7 +91,7 @@ $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE):
 create_rootfs_tar: $(OPENWRT_ROOT_TAR)
 
 $(OPENWRT_ROOT_TAR):
-	@echo "Extracting openwrt root"
+	@echo "Building openwrt root tar from image file"
 	@$(MKDIR) -p $(OPENWRT_IMGDIR)
 ifeq ($(BUILD_OS),FreeBSD)
 	@if ! $(MDCONFIG) -l -f $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE) > /dev/null; then \
@@ -254,6 +254,7 @@ iso: generate_initramfs copy_kernel copy_isolinux_files $(OUTPUT_ISO)
 
 $(OUTPUT_ISO):
 	@echo "Generating $(OUTPUT_ISO)"
+	@if [ "$(MKISOFS)" = "" ]; then echo "Error: mkisofs missing"; exit 1; fi
 	@$(MKISOFS) -quiet -r -T -J -V "mfslinux" -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 5 -boot-info-table -o $(OUTPUT_ISO) $(ISODIR)
 
 clean-download:
