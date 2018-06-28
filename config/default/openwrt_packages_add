@@ -22,3 +22,4 @@ packages/smartmontools_6.6-1_x86_64.ipk
 packages/rsync_3.1.3-1_x86_64.ipk
 packages/tmux_2.7-1_x86_64.ipk
 packages/ipmitool_1.8.18-1_x86_64.ipk
+packages/netcat_0.7.1-1_x86_64.ipk
