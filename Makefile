@@ -50,6 +50,7 @@ OPENWRT_KERNEL=		openwrt-18.06.0-rc1-x86-64-vmlinuz
 
 OPENWRT_PACKAGES_REMOVE?=	$(CONFIGDIR)/openwrt_packages_remove
 OPENWRT_PACKAGES_ADD?=		$(CONFIGDIR)/openwrt_packages_add
+OPENWRT_TARGET_PACKAGES_ADD?=	$(CONFIGDIR)/openwrt_target_packages_add
 OPENWRT_ROOT_TAR?=	$(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE).tar
 
 CONFIGFILES=	network system
@@ -144,7 +145,7 @@ ifeq ($(BUILD_OS),FreeBSD)
 else
 	@echo "Removing packages"
 	@$(MKDIR) -p $(OPENWRT_ROOTDIR)/tmp/lock
-	@if [ -f $(OPENWRT_PACKAGES_REMOVE) ]; then \
+	@if [ -f "$(OPENWRT_PACKAGES_REMOVE)" ]; then \
 	  PACKAGES_REMOVE=`$(CAT) $(OPENWRT_PACKAGES_REMOVE)`; \
 	else \
 	  PACKAGES_REMOVE=`$(CAT) $(CONFIGDIR)/default/openwrt_packages_remove`; \
@@ -154,7 +155,7 @@ endif
 	@$(TOUCH) $(WRKDIR)/.remove_packages_done
 
 download_packages:
-	@if [ -f $(OPENWRT_PACKAGES_ADD) ]; then \
+	@if [ -f "$(OPENWRT_PACKAGES_ADD)" ]; then \
 	  PACKAGES_ADD=`$(CAT) $(OPENWRT_PACKAGES_ADD)`; \
 	else \
 	  PACKAGES_ADD=`$(CAT) $(CONFIGDIR)/default/openwrt_packages_add`; \
@@ -164,6 +165,17 @@ download_packages:
 	if [ ! -f $(DOWNLOADDIR)/$${PKGNAME} ]; then \
 	echo "Downloading: $${PKG}"; \
 	cd $(DOWNLOADDIR) && $(WGET) $(OPENWRT_PACKAGES_URL)/$${PKG}; \
+	fi; \
+	done; \
+	if [ -f "$(OPENWRT_TARGET_PACKAGES_ADD)" ]; then \
+	  PACKAGES_ADD=`$(CAT) $(OPENWRT_TARGET_PACKAGES_ADD)`; \
+	else \
+	  PACKAGES_ADD=`$(CAT) $(CONFIGDIR)/default/openwrt_target_packages_add`; \
+	fi; \
+	for PKG in $$PACKAGES_ADD; do \
+	if [ ! -f $(DOWNLOADDIR)/$${PKG} ]; then \
+	echo "Downloading: $${PKG}"; \
+	cd $(DOWNLOADDIR) && $(WGET) $(OPENWRT_TARGET_URL)/packages/$${PKG}; \
 	fi; \
 	done
 
