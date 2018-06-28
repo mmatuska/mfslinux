@@ -73,6 +73,8 @@ OPENWRT_PACKAGES_ADD=		base/uclibcxx_0.2.4-3_x86_64.ipk \
 				packages/unbound-host_1.7.3-2_x86_64.ipk \
 				packages/dmidecode_3.1-1_x86_64.ipk \
 				packages/less_487-1_x86_64.ipk \
+				packages/libkmod_20-1_x86_64.ipk \
+				packages/pciutils_3.5.6-1_x86_64.ipk \
 				packages/smartmontools_6.6-1_x86_64.ipk \
 				packages/rsync_3.1.3-1_x86_64.ipk \
 				packages/tmux_2.7-1_x86_64.ipk \
