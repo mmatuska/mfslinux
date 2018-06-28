@@ -2,7 +2,6 @@
 #
 # Copyright (c) 2018 Martin Matuska <mm at FreeBSD.org>
 
-WGET?=		$(shell which wget)
 MOUNT?=		$(shell which mount)
 UMOUNT?=	$(shell which umount)
 LOSETUP?=	$(shell which losetup)
@@ -18,11 +17,20 @@ CP?=		$(shell which cp)
 RM?=		$(shell which rm)
 FIND?=		$(shell which find)
 CPIO?=		$(shell which cpio)
-MKISOFS?=	$(shell which mkisofs)
 OPENSSL?=	$(shell which openssl)
 CHROOT?=	$(shell which chroot)
 TOUCH?=		$(shell which touch)
 GIT?=		$(shell which git)
+MKISOFS?=	$(shell which mkisofs)
+
+BUILD_OS?=	$(shell uname)
+
+ifeq ($(BUILD_OS),FreeBSD)
+WGET?=		$(shell which fetch)
+MDCONFIG?=	$(shell which mdconfig)
+else
+WGET?=		$(shell which wget)
+endif
 
 CURDIR?=	$(shell pwd)
 CONFIGDIR?=	$(CURDIR)/config
@@ -64,6 +72,7 @@ OPENWRT_PACKAGES_ADD=		base/uclibcxx_0.2.4-3_x86_64.ipk \
 				base/libopenssl_1.0.2o-1_x86_64.ipk \
 				base/libustream-openssl_2018-04-30-527e7002-3_x86_64.ipk \
 				base/ca-certificates_20180409_all.ipk \
+				base/fdisk_2.32-2_x86_64.ipk \
 				base/libevent2_2.0.22-1_x86_64.ipk \
 				base/libpopt_1.16-1_x86_64.ipk \
 				base/libpcap_1.8.1-1_x86_64.ipk \
@@ -88,6 +97,7 @@ ISOLINUX_FILES=	isolinux.bin ldlinux.c32
 ROOTPW?=	mfsroot
 
 OUTPUT_ISO?=	mfslinux.iso
+
 
 all: iso
 
@@ -120,6 +130,15 @@ create_rootfs_tar: $(OPENWRT_ROOT_TAR)
 $(OPENWRT_ROOT_TAR):
 	@echo "Extracting openwrt root"
 	@$(MKDIR) -p $(OPENWRT_IMGDIR)
+ifeq ($(BUILD_OS),FreeBSD)
+	@if ! $(MDCONFIG) -l -f $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE) > /dev/null; then \
+	 $(MDCONFIG) -a -t vnode -f $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE); \
+	 fi
+	@LOOPDEV=`$(MDCONFIG) -l -f $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE) | $(HEAD) -1`; \
+	 if ! $(MOUNT) | $(GREP) $$LOOPDEV > /dev/null; then \
+	 $(MOUNT) -t ext2fs -o ro /dev/$$LOOPDEV $(OPENWRT_IMGDIR); \
+	 fi
+else
 	@if ! $(LOSETUP) -j $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE) | $(GREP) $(OPENWRT_ROOTFS_IMAGE) > /dev/null; then \
 	 $(LOSETUP) -f $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE); \
 	 fi
@@ -127,11 +146,17 @@ $(OPENWRT_ROOT_TAR):
 	 if ! $(MOUNT) | $(GREP) $$LOOPDEV > /dev/null; then \
 	 $(MOUNT) -o loop,ro $$LOOPDEV $(OPENWRT_IMGDIR); \
 	 fi
+endif
 	@$(TAR) -c -f $(OPENWRT_ROOT_TAR) -C $(OPENWRT_IMGDIR) .
 	@$(UMOUNT) $(OPENWRT_IMGDIR)
 	@$(RMDIR) $(OPENWRT_IMGDIR)
+ifeq ($(BUILD_OS),FreeBSD)
+	@LOOPDEV=`$(MDCONFIG) -l -f $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE) | $(HEAD) -1`; \
+	 $(MDCONFIG) -d -u $$LOOPDEV
+else
 	@LOOPDEV=`$(LOSETUP) -j $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE) | $(HEAD) -1 | $(AWK) -F: '{ print $$1 }'`; \
 	 $(LOSETUP) -d $$LOOPDEV
+endif
 
 extract_rootfs: create_rootfs_tar $(OPENWRT_ROOTDIR)/init
 
@@ -151,9 +176,13 @@ $(WRKDIR)/.rootpw_done:
 remove_packages: $(WRKDIR)/.remove_packages_done
 
 $(WRKDIR)/.remove_packages_done:
+ifeq ($(BUILD_OS),FreeBSD)
+	@echo "Removing OpenWRT packages not supported on FreeBSD"
+else
 	@echo "Removing packages"
 	@$(MKDIR) -p $(OPENWRT_ROOTDIR)/tmp/lock
 	@$(CHROOT) $(OPENWRT_ROOTDIR) opkg remove $(OPENWRT_PACKAGES_REMOVE)
+endif
 	@$(TOUCH) $(WRKDIR)/.remove_packages_done
 
 download_packages:
@@ -168,6 +197,9 @@ download_packages:
 add_packages: download_packages $(WRKDIR)/.add_packages_done
 
 $(WRKDIR)/.add_packages_done:
+ifeq ($(BUILD_OS),FreeBSD)
+	@echo "Adding new OpenWRT packages not supported on FreeBSD"
+else
 	@$(MKDIR) -p $(OPENWRT_ROOTDIR)/packages
 	@for PKG in $(OPENWRT_PACKAGES_ADD); do \
 	PKGNAME=`basename $$PKG`; \
@@ -175,6 +207,7 @@ $(WRKDIR)/.add_packages_done:
 	$(CHROOT) $(OPENWRT_ROOTDIR) opkg install /packages/$$PKGNAME; \
 	done
 	@$(RM) -rf $(OPENWRT_ROOTDIR)/packages
+endif
 	@$(TOUCH) $(WRKDIR)/.add_packages_done
 
 copy_configuration_files: $(WRKDIR)/.copy_configuration_files_done
