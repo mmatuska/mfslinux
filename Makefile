@@ -16,6 +16,7 @@ TAR?=		$(shell which tar)
 CP?=		$(shell which cp)
 RM?=		$(shell which rm)
 FIND?=		$(shell which find)
+CAT?=		$(shell which cat)
 CPIO?=		$(shell which cpio)
 OPENSSL?=	$(shell which openssl)
 CHROOT?=	$(shell which chroot)
@@ -48,46 +49,8 @@ OPENWRT_PACKAGES_URL=	http://downloads.openwrt.org/releases/18.06.0-rc1/packages
 OPENWRT_ROOTFS_IMAGE=	openwrt-18.06.0-rc1-x86-64-rootfs-ext4.img
 OPENWRT_KERNEL=		openwrt-18.06.0-rc1-x86-64-vmlinuz
 
-OPENWRT_PACKAGES_REMOVE=	luci \
-				luci-theme-bootstrap \
-				luci-proto-ppp \
-				luci-proto-ipv6 \
-				luci-mod-admin-full \
-				luci-app-firewall \
-				luci-base \
-				luci-lib-ip \
-				luci-lib-jsonc \
-				luci-lib-nixio \
-				dnsmasq \
-				uhttpd-mod-ubus \
-				uhttpd \
-				liblucihttp-lua \
-				liblucihttp
-
-OPENWRT_PACKAGES_ADD=		base/uclibcxx_0.2.4-3_x86_64.ipk \
-				base/terminfo_6.1-1_x86_64.ipk \
-				base/libreadline_7.0-1_x86_64.ipk \
-				base/libncurses_6.1-1_x86_64.ipk \
-				base/zlib_1.2.11-2_x86_64.ipk \
-				base/libopenssl_1.0.2o-1_x86_64.ipk \
-				base/libustream-openssl_2018-04-30-527e7002-3_x86_64.ipk \
-				base/ca-certificates_20180409_all.ipk \
-				base/fdisk_2.32-2_x86_64.ipk \
-				base/libevent2_2.0.22-1_x86_64.ipk \
-				base/libpopt_1.16-1_x86_64.ipk \
-				base/libpcap_1.8.1-1_x86_64.ipk \
-				base/tcpdump_4.9.2-1_x86_64.ipk \
-				packages/atftp_0.7.1-5_x86_64.ipk \
-				packages/libunbound_1.7.3-2_x86_64.ipk \
-				packages/unbound-host_1.7.3-2_x86_64.ipk \
-				packages/dmidecode_3.1-1_x86_64.ipk \
-				packages/less_487-1_x86_64.ipk \
-				packages/libkmod_20-1_x86_64.ipk \
-				packages/pciutils_3.5.6-1_x86_64.ipk \
-				packages/smartmontools_6.6-1_x86_64.ipk \
-				packages/rsync_3.1.3-1_x86_64.ipk \
-				packages/tmux_2.7-1_x86_64.ipk \
-				packages/ipmitool_1.8.18-1_x86_64.ipk
+OPENWRT_PACKAGES_REMOVE?=	$(CONFIGDIR)/openwrt_packages_remove
+OPENWRT_PACKAGES_ADD?=		$(CONFIGDIR)/openwrt_packages_add
 
 CONFIGFILES=	network system
 ISOLINUX_CFG=	$(ISOLINUXDIR)/isolinux.cfg
@@ -181,12 +144,22 @@ ifeq ($(BUILD_OS),FreeBSD)
 else
 	@echo "Removing packages"
 	@$(MKDIR) -p $(OPENWRT_ROOTDIR)/tmp/lock
-	@$(CHROOT) $(OPENWRT_ROOTDIR) opkg remove $(OPENWRT_PACKAGES_REMOVE)
+	@if [ -f $(OPENWRT_PACKAGES_REMOVE) ]; then \
+	  PACKAGES_REMOVE=`$(CAT) $(OPENWRT_PACKAGES_REMOVE)`; \
+	else \
+	  PACKAGES_REMOVE=`$(CAT) $(CONFIGDIR)/default/openwrt_packages_remove`; \
+	fi; \
+	  $(CHROOT) $(OPENWRT_ROOTDIR) opkg remove $$PACKAGES_REMOVE
 endif
 	@$(TOUCH) $(WRKDIR)/.remove_packages_done
 
 download_packages:
-	@for PKG in $(OPENWRT_PACKAGES_ADD); do \
+	@if [ -f $(OPENWRT_PACKAGES_ADD) ]; then \
+	  PACKAGES_ADD=`$(CAT) $(OPENWRT_PACKAGES_ADD)`; \
+	else \
+	  PACKAGES_ADD=`$(CAT) $(CONFIGDIR)/default/openwrt_packages_add`; \
+	fi; \
+	for PKG in $$PACKAGES_ADD; do \
 	PKGNAME=`basename $$PKG`; \
 	if [ ! -f $(DOWNLOADDIR)/$${PKGNAME} ]; then \
 	echo "Downloading: $${PKG}"; \
@@ -201,7 +174,12 @@ ifeq ($(BUILD_OS),FreeBSD)
 	@echo "Adding new OpenWRT packages not supported on FreeBSD"
 else
 	@$(MKDIR) -p $(OPENWRT_ROOTDIR)/packages
-	@for PKG in $(OPENWRT_PACKAGES_ADD); do \
+	@if [ -f $(OPENWRT_PACKAGES_ADD) ]; then \
+	  PACKAGES_ADD=`$(CAT) $(OPENWRT_PACKAGES_ADD)`; \
+	else \
+	  PACKAGES_ADD=`$(CAT) $(CONFIGDIR)/default/openwrt_packages_add`; \
+	fi; \
+	for PKG in $$PACKAGES_ADD; do \
 	PKGNAME=`basename $$PKG`; \
 	$(CP) $(DOWNLOADDIR)/$$PKGNAME $(OPENWRT_ROOTDIR)/packages; \
 	$(CHROOT) $(OPENWRT_ROOTDIR) opkg install /packages/$$PKGNAME; \
@@ -217,8 +195,8 @@ $(WRKDIR)/.copy_configuration_files_done:
 	@for FILE in $(CONFIGFILES); do \
 	if [ -f $(CONFIGDIR)/$$FILE ]; then \
 		$(CP) -f $(CONFIGDIR)/$$FILE $(WRKDIR)/openwrt_root/etc/config/$$FILE; \
-	elif [ -f $(CONFIGDIR)/$$FILE.sample ]; then \
-		$(CP) -f $(CONFIGDIR)/$$FILE.sample $(WRKDIR)/openwrt_root/etc/config/$$FILE; \
+	elif [ -f $(CONFIGDIR)/default/$$FILE ]; then \
+		$(CP) -f $(CONFIGDIR)/default/$$FILE $(WRKDIR)/openwrt_root/etc/config/$$FILE; \
 	else \
 		echo "Missing configuration file: $(CONFIGDIR)/$$FILE"; \
 		exit 1; \

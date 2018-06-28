@@ -1,6 +1,5 @@
 download
 work
 *.iso
-config
-!config/*.sample
-
+config/*
+!config/default
