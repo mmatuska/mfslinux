@@ -59,9 +59,9 @@ ISOLINUX_BOOTTXT=	$(ISOLINUXDIR)/boot.txt
 ISOLINUX_FILES=	isolinux.bin ldlinux.c32
 
 ROOTPW?=	mfsroot
+ROOT_SHELL?=	/bin/bash
 
 OUTPUT_ISO?=	mfslinux.iso
-
 
 all: iso
 
@@ -129,13 +129,22 @@ $(OPENWRT_ROOTDIR)/init:
 	@$(TAR) -x -f $(OPENWRT_ROOT_TAR) -C $(OPENWRT_ROOTDIR)
 	@$(CP) $(OPENWRT_ROOTDIR)/sbin/init $(OPENWRT_ROOTDIR)/init
 
-set_rootpw: $(WRKDIR)/.rootpw_done
+set_root_pw: $(WRKDIR)/.set_root_pw_done
 
-$(WRKDIR)/.rootpw_done:
+$(WRKDIR)/.set_root_pw_done:
 	@echo "Setting root password"
 	@ROOTPW_HASH=`$(OPENSSL) passwd -1 $(ROOTPW)`; \
 	$(SED) -i -e "s,root:[^:]*,root:$$ROOTPW_HASH,g" $(OPENWRT_ROOTDIR)/etc/shadow
-	@$(TOUCH) $(WRKDIR)/.rootpw_done
+	@$(TOUCH) $(WRKDIR)/.set_root_pw_done
+
+set_root_shell: $(WRKDIR)/.set_root_shell_done
+
+$(WRKDIR)/.set_root_shell_done:
+	@if [ -n "$(ROOT_SHELL)" ]; then \
+	echo "Setting root shell"; \
+	$(SED) -i -e "s,/bin/ash,$(ROOT_SHELL),g" $(OPENWRT_ROOTDIR)/etc/passwd; \
+	$(TOUCH) $(WRKDIR)/.set_root_shell_done; \
+	fi
 
 remove_packages: $(WRKDIR)/.remove_packages_done
 
@@ -263,7 +272,7 @@ $(WRKDIR)/.copy_isolinux_files_done:
 	@$(CP) -f $(ISOLINUX_BOOTTXT) $(ISODIR)/isolinux/boot.txt
 	@$(TOUCH) $(WRKDIR)/.copy_isolinux_files_done
 
-customize_rootfs: remove_packages add_packages copy_configuration_files set_rootpw host_key banner
+customize_rootfs: remove_packages add_packages copy_configuration_files set_root_pw set_root_shell host_key banner
 
 generate_initramfs: download_rootfs_image extract_rootfs customize_rootfs $(ISODIR)/isolinux/initramfs.igz
 
@@ -272,7 +281,7 @@ iso: generate_initramfs copy_kernel copy_isolinux_files $(OUTPUT_ISO)
 $(OUTPUT_ISO):
 	@echo "Generating $(OUTPUT_ISO)"
 	@if [ "$(MKISOFS)" = "" ]; then echo "Error: mkisofs missing"; exit 1; fi
-	@$(MKISOFS) -quiet -r -T -J -V "mfslinux" -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 5 -boot-info-table -o $(OUTPUT_ISO) $(ISODIR)
+	@$(MKISOFS) -quiet -r -T -J -iso-level 2 -V "mfslinux" -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o $(OUTPUT_ISO) $(ISODIR)
 
 clean-download:
 	@if [ "$(DOWNLOADDIR)" != "/" ]; then $(RM) -rf $(DOWNLOADDIR); fi
