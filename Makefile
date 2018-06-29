@@ -1,6 +1,8 @@
 # mfslinux
 #
 # Copyright (c) 2018 Martin Matuska <mm at FreeBSD.org>
+#
+MFSLINUX_VERSION?=	0.1
 
 MOUNT?=		$(shell which mount)
 UMOUNT?=	$(shell which umount)
@@ -61,7 +63,9 @@ ISOLINUX_FILES=	isolinux.bin ldlinux.c32
 ROOTPW?=	mfsroot
 ROOT_SHELL?=	/bin/bash
 
-OUTPUT_ISO?=	mfslinux.iso
+GIT_REVISION=	$(shell $(GIT) rev-parse --short HEAD)
+
+OUTPUT_ISO?=	mfslinux-$(MFSLINUX_VERSION)-$(GIT_REVISION).iso
 
 all: iso
 
@@ -244,7 +248,7 @@ banner: $(WRKDIR)/.banner_done
 
 $(WRKDIR)/.banner_done:
 	@echo "Appending mfslinux info to OpenWRT banner"
-	@echo " mfslinux `$(GIT) rev-parse --short HEAD`" >> $(OPENWRT_ROOTDIR)/etc/banner
+	@echo " mfslinux $(MFSLINUX_VERSION) $(GIT_REVISION)" >> $(OPENWRT_ROOTDIR)/etc/banner
 	@echo " -----------------------------------------------------" >> \
 		$(OPENWRT_ROOTDIR)/etc/banner
 	@$(TOUCH) $(WRKDIR)/.banner_done
