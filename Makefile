@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2018 Martin Matuska <mm at FreeBSD.org>
 #
-MFSLINUX_VERSION?=	0.1
+MFSLINUX_VERSION?=	0.1.1
 
 MOUNT?=		$(shell which mount)
 UMOUNT?=	$(shell which umount)
@@ -45,10 +45,10 @@ ISODIR?=	$(WRKDIR)/iso
 OPENWRT_ROOTDIR?=	$(WRKDIR)/openwrt_root
 OPENWRT_IMGDIR?=	$(WRKDIR)/openwrt_root_img
 
-OPENWRT_TARGET_URL=	https://downloads.openwrt.org/releases/18.06.0-rc1/targets/x86/64/
-OPENWRT_PACKAGES_URL=	http://downloads.openwrt.org/releases/18.06.0-rc1/packages/x86_64/
-OPENWRT_ROOTFS_IMAGE=	openwrt-18.06.0-rc1-x86-64-rootfs-ext4.img
-OPENWRT_KERNEL=		openwrt-18.06.0-rc1-x86-64-vmlinuz
+OPENWRT_TARGET_URL=	https://downloads.openwrt.org/releases/18.06.0-rc2/targets/x86/64/
+OPENWRT_PACKAGES_URL=	http://downloads.openwrt.org/releases/18.06.0-rc2/packages/x86_64/
+OPENWRT_ROOTFS_IMAGE=	openwrt-18.06.0-rc2-x86-64-rootfs-ext4.img
+OPENWRT_KERNEL=		openwrt-18.06.0-rc2-x86-64-vmlinuz
 
 OPENWRT_PACKAGES_REMOVE?=	$(CONFIGDIR)/openwrt_packages_remove
 OPENWRT_PACKAGES_ADD?=		$(CONFIGDIR)/openwrt_packages_add
