@@ -19,6 +19,9 @@ mfslinux is currently based on [OpenWRT](https://openwrt.org)
 ## Runtime requirements
  - recommended minimum of 128MB system memory
 
+## License
+ - [GNU General Public License version 3](./LICENSE.md) or higher
+
 ## Other information
 
 See [BUILD](./BUILD.md) for building instructions.
