@@ -25,12 +25,12 @@ CHROOT?=	$(shell which chroot)
 TOUCH?=		$(shell which touch)
 GIT?=		$(shell which git)
 MKISOFS?=	$(shell which mkisofs)
-
 BUILD_OS?=	$(shell uname)
 
 ifeq ($(BUILD_OS),FreeBSD)
 WGET?=		$(shell which fetch)
 MDCONFIG?=	$(shell which mdconfig)
+OPKG_CL?=	$(shell which opkg-cl)
 else
 WGET?=		$(shell which wget)
 endif
@@ -73,6 +73,17 @@ ifeq ("$(VERBOSE)","0")
 	_v=@
 else
 	_v=
+endif
+
+ifeq ($(BUILD_OS),FreeBSD)
+OPKG_PROG=	opkg-cl
+OPKG_ARGS=	--add-arch all:1 \
+		--add-arch noarch:1 \
+		--add-arch x86_64:10 \
+                --conf /etc/opkg.conf
+else
+OPKG_PROG=	opkg
+OPKG_ARGS=
 endif
 
 all: iso
@@ -161,17 +172,28 @@ $(WRKDIR)/.set_root_shell_done:
 remove_packages: $(WRKDIR)/.remove_packages_done
 
 $(WRKDIR)/.remove_packages_done:
-ifeq ($(BUILD_OS),FreeBSD)
-	$(_v)echo "Removing OpenWRT packages not supported on FreeBSD"
-else
 	$(_v)echo "Removing packages"
 	$(_v)$(MKDIR) -p $(OPENWRT_ROOTDIR)/tmp/lock
+ifeq ($(BUILD_OS),FreeBSD)
+	$(_v)$(MKDIR) -p $(OPENWRT_ROOTDIR)/libexec
+	$(_v)$(CP) /libexec/ld-elf.so.* $(OPENWRT_ROOTDIR)/libexec
+	$(_v)$(CP) $(OPKG_CL) $(OPENWRT_ROOTDIR)/bin
+	$(_v)$(CP) /lib/libthr.so.* /lib/libc.so.* \
+		$(OPENWRT_ROOTDIR)/lib
+endif
 	$(_v)if [ -f "$(OPENWRT_PACKAGES_REMOVE)" ]; then \
 	  PACKAGES_REMOVE=`$(CAT) $(OPENWRT_PACKAGES_REMOVE)`; \
 	else \
 	  PACKAGES_REMOVE=`$(CAT) $(CONFIGDIR)/default/openwrt_packages_remove`; \
 	fi; \
-	  $(CHROOT) $(OPENWRT_ROOTDIR) env PATH="/usr/sbin:/usr/bin:/sbin:/bin" opkg remove $$PACKAGES_REMOVE
+	$(CHROOT) $(OPENWRT_ROOTDIR) env PATH="/usr/sbin:/usr/bin:/sbin:/bin" \
+		$(OPKG_PROG) $(OPKG_ARGS) remove $$PACKAGES_REMOVE
+ifeq ($(BUILD_OS),FreeBSD)
+	$(_v)$(RM) $(OPENWRT_ROOTDIR)/bin/opkg-cl \
+		$(OPENWRT_ROOTDIR)/lib/libc.so.* \
+		$(OPENWRT_ROOTDIR)/lib/libthr.so.* \
+		$(OPENWRT_ROOTDIR)/libexec/ld-elf.so.*
+	$(_v)$(RMDIR) $(OPENWRT_ROOTDIR)/libexec
 endif
 	$(_v)$(TOUCH) $(WRKDIR)/.remove_packages_done
 
@@ -204,8 +226,12 @@ add_packages: download_packages $(WRKDIR)/.add_packages_done
 
 $(WRKDIR)/.add_packages_done:
 ifeq ($(BUILD_OS),FreeBSD)
-	$(_v)echo "Adding new OpenWRT packages not supported on FreeBSD"
-else
+	$(_v)$(MKDIR) -p $(OPENWRT_ROOTDIR)/libexec
+	$(_v)$(CP) /libexec/ld-elf.so.* $(OPENWRT_ROOTDIR)/libexec
+	$(_v)$(CP) /usr/local/bin/$(OPKG_PROG) $(OPENWRT_ROOTDIR)/bin
+	$(_v)$(CP) /lib/libthr.so.* /lib/libc.so.* \
+		$(OPENWRT_ROOTDIR)/lib
+endif
 	$(_v)$(MKDIR) -p $(OPENWRT_ROOTDIR)/packages
 	$(_v)if [ -f $(OPENWRT_TARGET_PACKAGES_ADD) ]; then \
 	  PACKAGES_ADD=`$(CAT) $(OPENWRT_TARGET_PACKAGES_ADD)`; \
@@ -220,9 +246,16 @@ else
 	for PKG in $$PACKAGES_ADD; do \
 	PKGNAME=`basename $$PKG`; \
 	$(CP) $(DOWNLOADDIR)/$$PKGNAME $(OPENWRT_ROOTDIR)/packages; \
-	$(CHROOT) $(OPENWRT_ROOTDIR) env PATH="/usr/sbin:/usr/bin:/sbin:/bin" opkg install /packages/$$PKGNAME; \
+	$(CHROOT) $(OPENWRT_ROOTDIR) env PATH="/usr/sbin:/usr/bin:/sbin:/bin" \
+		$(OPKG_PROG) $(OPKG_ARGS) install /packages/$$PKGNAME; \
 	done; \
 	$(RM) -rf $(OPENWRT_ROOTDIR)/packages
+ifeq ($(BUILD_OS),FreeBSD)
+	$(_v)$(RM) $(OPENWRT_ROOTDIR)/bin/opkg-cl \
+		$(OPENWRT_ROOTDIR)/lib/libc.so.* \
+		$(OPENWRT_ROOTDIR)/lib/libthr.so.* \
+		$(OPENWRT_ROOTDIR)/libexec/ld-elf.so.*
+	$(_v)$(RMDIR) $(OPENWRT_ROOTDIR)/libexec
 endif
 	$(_v)$(TOUCH) $(WRKDIR)/.add_packages_done
 
