@@ -12,10 +12,17 @@ If you want any additional packages downloaded and installed, you need to copy
 the package list from config/default to config and edit it.
 
 ## Requirements
-You need openssl, git and mkisofs (sysutils/cdrtools).
-On FreeBSD you additionally need opkg-cl (archivers/opkg).
 
-## Creating image
+You need to build as root (ext4 image extraction and chrooting is required).
+
+### Linux
+ - openssl, git, mkisofs or genisoimage
+
+### FreeBSD
+ - git (devel/git), mkisofs (sysutils/cdrtools), opkg-cl (archivers/opkg)
+ - linux64 module loaded for opkg chroot
+
+## Creating an image
 
 Simply run make on Linux or gmake on FreeBSD
 

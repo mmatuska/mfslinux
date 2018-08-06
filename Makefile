@@ -24,7 +24,7 @@ OPENSSL?=	$(shell which openssl)
 CHROOT?=	$(shell which chroot)
 TOUCH?=		$(shell which touch)
 GIT?=		$(shell which git)
-MKISOFS?=	$(shell which mkisofs)
+MKISOFS?=	$(shell which mkisofs || shell which genisoimage)
 BUILD_OS?=	$(shell uname)
 
 ifeq ($(BUILD_OS),FreeBSD)
