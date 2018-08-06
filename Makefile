@@ -49,6 +49,7 @@ OPENWRT_TARGET_URL=	https://downloads.openwrt.org/releases/18.06.0/targets/x86/6
 OPENWRT_PACKAGES_URL=	http://downloads.openwrt.org/releases/18.06.0/packages/x86_64/
 OPENWRT_ROOTFS_IMAGE=	openwrt-18.06.0-x86-64-rootfs-ext4.img
 OPENWRT_KERNEL=		openwrt-18.06.0-x86-64-vmlinuz
+OPENWRT_KERNEL_VERSION=	4.14.54
 
 OPENWRT_PACKAGES_REMOVE?=	$(CONFIGDIR)/openwrt_packages_remove
 OPENWRT_PACKAGES_ADD?=		$(CONFIGDIR)/openwrt_packages_add
@@ -194,6 +195,8 @@ download_packages:
 	else \
 	  PACKAGES_ADD=`$(CAT) $(CONFIGDIR)/default/openwrt_target_packages_add`; \
 	fi; \
+	PACKAGES_ADD=`echo $$PACKAGES_ADD | $(SED) -e \
+	  "s,%%KERNEL_VERSION%%,$(OPENWRT_KERNEL_VERSION),g"`; \
 	for PKG in $$PACKAGES_ADD; do \
 	if [ ! -f $(DOWNLOADDIR)/$${PKG} ]; then \
 	echo "Downloading: $${PKG}"; \
@@ -222,6 +225,8 @@ $(WRKDIR)/.add_packages_done:
 	else \
 	  PACKAGES_ADD=`$(CAT) $(CONFIGDIR)/default/openwrt_target_packages_add`; \
 	fi; \
+	PACKAGES_ADD=`echo $$PACKAGES_ADD | $(SED) -e \
+	  "s,%%KERNEL_VERSION%%,$(OPENWRT_KERNEL_VERSION),g"`; \
 	if [ -f $(OPENWRT_PACKAGES_ADD) ]; then \
 	  PACKAGES_ADD="$$PACKAGES_ADD `$(CAT) $(OPENWRT_PACKAGES_ADD)`"; \
 	else \
