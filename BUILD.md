@@ -28,10 +28,10 @@ Simply run make on Linux or gmake on FreeBSD
 
 ## Examples
 
-1. create mfslinux.iso bootable ISO file on Linux:
+1. create mfslinux.iso bootable ISO file on Linux with a different root password:
 
   ```bash
-  make 
+  make ROOTPW=testpass
   ```
 
 2. create mfslinux.iso bootable ISO file on FreeBSD with increased verbosity:
