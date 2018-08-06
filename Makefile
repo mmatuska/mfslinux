@@ -25,6 +25,7 @@ CHROOT?=	$(shell which chroot)
 TOUCH?=		$(shell which touch)
 GIT?=		$(shell which git)
 MKISOFS?=	$(shell which mkisofs || which genisoimage)
+STAT?=		$(shell which stat)
 BUILD_OS?=	$(shell uname)
 
 ifeq ($(BUILD_OS),FreeBSD)
@@ -309,6 +310,7 @@ $(OUTPUT_ISO):
 	$(_v)echo "Generating $(OUTPUT_ISO)"
 	$(_v)if [ "$(MKISOFS)" = "" ]; then echo "Error: mkisofs or genisoimage missing"; exit 1; fi
 	$(_v)$(MKISOFS) -quiet -r -T -J -iso-level 2 -V "mfslinux" -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o $(OUTPUT_ISO) $(ISODIR)
+	$(_v)$(STAT) -f "%z %N" $(OUTPUT_ISO)
 
 clean-download:
 	$(_v)if [ "$(DOWNLOADDIR)" != "/" ]; then $(RM) -rf $(DOWNLOADDIR); fi

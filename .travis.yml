@@ -1,0 +1,8 @@
+sudo: required
+dist: trusty
+addons:
+  apt:
+    packages:
+      - genisoimage
+script:
+  - sudo make
