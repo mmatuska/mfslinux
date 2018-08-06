@@ -26,10 +26,16 @@ You need to build as root (ext4 image extraction and chrooting is required).
 
 Simply run make on Linux or gmake on FreeBSD
 
-##Examples
+## Examples
 
-1. mfslinux.iso bootable ISO file:
+1. create mfslinux.iso bootable ISO file on Linux:
 
   ```bash
   make 
+  ```
+
+2. create mfslinux.iso bootable ISO file on FreeBSD with increased verbosity:
+
+  ```bash
+  gmake VERBOSE=1
   ```
