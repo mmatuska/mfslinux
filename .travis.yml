@@ -5,4 +5,4 @@ addons:
     packages:
       - genisoimage
 script:
-  - sudo make
+  - sudo make VERBOSE=1

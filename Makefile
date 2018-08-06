@@ -25,15 +25,17 @@ CHROOT?=	$(shell which chroot)
 TOUCH?=		$(shell which touch)
 GIT?=		$(shell which git)
 MKISOFS?=	$(shell which mkisofs || which genisoimage)
-STAT?=		$(shell which stat)
+LS?=		$(shell which ls)
 BUILD_OS?=	$(shell uname)
 
 ifeq ($(BUILD_OS),FreeBSD)
 WGET?=		$(shell which fetch)
+WGET_ARGS?=	-q
 MDCONFIG?=	$(shell which mdconfig)
 OPKG_CL?=	$(shell which opkg-cl)
 else
 WGET?=		$(shell which wget)
+WGET_ARGS?=	-nv
 endif
 
 CURDIR?=	$(shell pwd)
@@ -109,12 +111,14 @@ download_rootfs_image: $(DOWNLOADDIR) $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE)
 
 $(DOWNLOADDIR)/$(OPENWRT_KERNEL):
 	$(_v)echo "Downloading OpenWRT kernel"
-	$(_v)cd $(DOWNLOADDIR) && $(WGET) $(OPENWRT_TARGET_URL)/$(OPENWRT_KERNEL)
+	$(_v)cd $(DOWNLOADDIR) && $(WGET) $(WGET_ARGS) \
+		$(OPENWRT_TARGET_URL)/$(OPENWRT_KERNEL)
 
 # Download and extract rootfs image
 $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE):
 	$(_v)echo "Downloading OpenWRT rootfs image"
-	$(_v)cd $(DOWNLOADDIR) && $(WGET) $(OPENWRT_TARGET_URL)/$(OPENWRT_ROOTFS_IMAGE).gz
+	$(_v)cd $(DOWNLOADDIR) && $(WGET) $(WGET_ARGS) \
+		$(OPENWRT_TARGET_URL)/$(OPENWRT_ROOTFS_IMAGE).gz
 	$(_v)echo "Extracting OpenWRT rootfs image"
 	$(_v)cd $(DOWNLOADDIR) && $(GZIP) -d $(OPENWRT_ROOTFS_IMAGE).gz
 
@@ -201,7 +205,8 @@ download_packages:
 	for PKG in $$PACKAGES_ADD; do \
 	if [ ! -f $(DOWNLOADDIR)/$${PKG} ]; then \
 	echo "Downloading: $${PKG}"; \
-	cd $(DOWNLOADDIR) && $(WGET) $(OPENWRT_TARGET_URL)/packages/$${PKG}; \
+	cd $(DOWNLOADDIR) && $(WGET) $(WGET_ARGS) \
+		$(OPENWRT_TARGET_URL)/packages/$${PKG}; \
 	fi; \
 	done; \
 	if [ -f "$(OPENWRT_PACKAGES_ADD)" ]; then \
@@ -213,7 +218,8 @@ download_packages:
 	PKGNAME=`basename $$PKG`; \
 	if [ ! -f $(DOWNLOADDIR)/$${PKGNAME} ]; then \
 	echo "Downloading: $${PKG}"; \
-	cd $(DOWNLOADDIR) && $(WGET) $(OPENWRT_PACKAGES_URL)/$${PKG}; \
+	cd $(DOWNLOADDIR) && $(WGET) $(WGET_ARGS) \
+		$(OPENWRT_PACKAGES_URL)/$${PKG}; \
 	fi; \
 	done
 
@@ -310,7 +316,7 @@ $(OUTPUT_ISO):
 	$(_v)echo "Generating $(OUTPUT_ISO)"
 	$(_v)if [ "$(MKISOFS)" = "" ]; then echo "Error: mkisofs or genisoimage missing"; exit 1; fi
 	$(_v)$(MKISOFS) -quiet -r -T -J -iso-level 2 -V "mfslinux" -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o $(OUTPUT_ISO) $(ISODIR)
-	$(_v)$(STAT) -f "%z %N" $(OUTPUT_ISO)
+	$(_v)$(LS) -l $(OUTPUT_ISO)
 
 clean-download:
 	$(_v)if [ "$(DOWNLOADDIR)" != "/" ]; then $(RM) -rf $(DOWNLOADDIR); fi
