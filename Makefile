@@ -24,7 +24,7 @@ OPENSSL?=	$(shell which openssl)
 CHROOT?=	$(shell which chroot)
 TOUCH?=		$(shell which touch)
 GIT?=		$(shell which git)
-MKISOFS?=	$(shell which mkisofs || shell which genisoimage)
+MKISOFS?=	$(shell which mkisofs || which genisoimage)
 BUILD_OS?=	$(shell uname)
 
 ifeq ($(BUILD_OS),FreeBSD)
@@ -302,7 +302,7 @@ iso: generate_initramfs copy_kernel copy_isolinux_files $(OUTPUT_ISO)
 
 $(OUTPUT_ISO):
 	$(_v)echo "Generating $(OUTPUT_ISO)"
-	$(_v)if [ "$(MKISOFS)" = "" ]; then echo "Error: mkisofs missing"; exit 1; fi
+	$(_v)if [ "$(MKISOFS)" = "" ]; then echo "Error: mkisofs or genisoimage missing"; exit 1; fi
 	$(_v)$(MKISOFS) -quiet -r -T -J -iso-level 2 -V "mfslinux" -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o $(OUTPUT_ISO) $(ISODIR)
 
 clean-download:
