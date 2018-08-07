@@ -327,19 +327,11 @@ $(OUTPUT_ISO):
 check: iso
 	$(_v)echo Examining output ISO file
 	$(_v)$(LS) -l $(OUTPUT_ISO)
-ifeq ($(BUILD_OS),FreeBSD)
-	$(_v)VERIFY="`$(FILE) -b $(OUTPUT_ISO)`"; \
+	$(_v)VERIFY="`$(FILE) -b $(OUTPUT_ISO) | $(GREP) -o 'ISO 9660.*'`"; \
 		echo $$VERIFY; \
 		if [ "$$VERIFY" != "$(VERIFY_STRING)" ]; then \
 			exit 1; \
 		fi
-else
-	$(_v)VERIFY="# `$(FILE) -b $(OUTPUT_ISO)`"; \
-		echo $$VERIFY; \
-		if [ "$$VERIFY" != "$(VERIFY_STRING)" ]; then \
-			exit 1; \
-		fi
-endif
 	$(_v)$(BSDTAR) -t -v -f $(OUTPUT_ISO)
 
 clean-download:
