@@ -37,3 +37,4 @@ packages/libdevmapper_2.02.177-1_x86_64.ipk
 packages/lvm2_2.02.177-1_x86_64.ipk
 packages/libwrap_7.6-1_x86_64.ipk
 packages/nfs-utils_2.3.1-1_x86_64.ipk
+packages/dosfstools_4.1-1_x86_64.ipk

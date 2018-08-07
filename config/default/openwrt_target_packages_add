@@ -14,3 +14,12 @@ kmod-fs-exportfs_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-crypto-crc32c_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-lib-crc32c_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-fs-xfs_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-scsi-core_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-scsi-cdrom_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-nls-base_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-nls-cp437_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-nls-iso8859-1_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-nls-utf8_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-lib-zlib-inflate_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-fs-isofs_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-fs-vfat_%%KERNEL_VERSION%%-1_x86_64.ipk
