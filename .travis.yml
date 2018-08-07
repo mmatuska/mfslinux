@@ -4,5 +4,6 @@ addons:
   apt:
     packages:
       - genisoimage
+      - bsdtar
 script:
-  - sudo make VERBOSE=1
+  - sudo make check VERBOSE=1

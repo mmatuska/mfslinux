@@ -26,6 +26,8 @@ TOUCH?=		$(shell which touch)
 GIT?=		$(shell which git)
 MKISOFS?=	$(shell which mkisofs || which genisoimage)
 LS?=		$(shell which ls)
+FILE?=		$(shell which file)
+BSDTAR?=	$(shell which bsdtar)
 BUILD_OS?=	$(shell uname)
 
 ifeq ($(BUILD_OS),FreeBSD)
@@ -70,6 +72,7 @@ ROOT_SHELL?=	/bin/bash
 GIT_REVISION=	$(shell $(GIT) rev-parse --short HEAD)
 
 OUTPUT_ISO?=	mfslinux-$(MFSLINUX_VERSION)-$(GIT_REVISION).iso
+OUTPUT_ISO_LABEL?=	mfslinux
 
 VERBOSE?=	0
 
@@ -94,6 +97,8 @@ OPKG_PROG=	env PATH="/usr/sbin:/usr/bin:/sbin:/bin" \
 		opkg
 OPKG_ARGS=
 endif
+
+VERIFY_STRING=	ISO 9660 CD-ROM filesystem data '$(OUTPUT_ISO_LABEL)' (bootable)
 
 all: iso
 
@@ -252,13 +257,13 @@ copy_configuration_files: $(WRKDIR)/.copy_configuration_files_done
 
 $(WRKDIR)/.copy_configuration_files_done:
 	$(_v)echo "Coypying configuration files"
-	$(_v)for FILE in $(CONFIGFILES); do \
-	if [ -f $(CONFIGDIR)/$$FILE ]; then \
-		$(CP) -f $(CONFIGDIR)/$$FILE $(WRKDIR)/openwrt_root/etc/config/$$FILE; \
-	elif [ -f $(CONFIGDIR)/default/$$FILE ]; then \
-		$(CP) -f $(CONFIGDIR)/default/$$FILE $(WRKDIR)/openwrt_root/etc/config/$$FILE; \
+	$(_v)for file in $(CONFIGFILES); do \
+	if [ -f $(CONFIGDIR)/$$file ]; then \
+		$(CP) -f $(CONFIGDIR)/$$file $(WRKDIR)/openwrt_root/etc/config/$$file; \
+	elif [ -f $(CONFIGDIR)/default/$$file ]; then \
+		$(CP) -f $(CONFIGDIR)/default/$$file $(WRKDIR)/openwrt_root/etc/config/$$file; \
 	else \
-		echo "Missing configuration file: $(CONFIGDIR)/$$FILE"; \
+		echo "Missing configuration file: $(CONFIGDIR)/$$file"; \
 		exit 1; \
 	fi; \
 	done
@@ -299,8 +304,8 @@ copy_isolinux_files: $(WRKDIR)/.copy_isolinux_files_done
 
 $(WRKDIR)/.copy_isolinux_files_done:
 	$(_v)echo "Copying isolinux files"
-	$(_v)for FILE in $(ISOLINUX_FILES); do \
-	$(CP) -f $(ISOLINUXDIR)/$$FILE $(ISODIR)/isolinux/$$FILE; \
+	$(_v)for file in $(ISOLINUX_FILES); do \
+	$(CP) -f $(ISOLINUXDIR)/$$file $(ISODIR)/isolinux/$$file; \
 	 done
 	$(_v)$(CP) -f $(ISOLINUX_CFG) $(ISODIR)/isolinux/isolinux.cfg
 	$(_v)$(CP) -f $(ISOLINUX_BOOTTXT) $(ISODIR)/isolinux/boot.txt
@@ -315,8 +320,27 @@ iso: generate_initramfs copy_kernel copy_isolinux_files $(OUTPUT_ISO)
 $(OUTPUT_ISO):
 	$(_v)echo "Generating $(OUTPUT_ISO)"
 	$(_v)if [ "$(MKISOFS)" = "" ]; then echo "Error: mkisofs or genisoimage missing"; exit 1; fi
-	$(_v)$(MKISOFS) -quiet -r -T -J -iso-level 2 -V "mfslinux" -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o $(OUTPUT_ISO) $(ISODIR)
+	$(_v)$(MKISOFS) -quiet -r -T -J -iso-level 2 -V "$(OUTPUT_ISO_LABEL)" \
+		-b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 \
+		-boot-info-table -o $(OUTPUT_ISO) $(ISODIR)
+
+check: iso
+	$(_v)echo Examining output ISO file
 	$(_v)$(LS) -l $(OUTPUT_ISO)
+ifeq ($(BUILD_OS),FreeBSD)
+	$(_v)VERIFY="`$(FILE) -b $(OUTPUT_ISO)`"; \
+		echo $$VERIFY; \
+		if [ "$$VERIFY" != "$(VERIFY_STRING)" ]; then \
+			exit 1; \
+		fi
+else
+	$(_v)VERIFY="# `$(FILE) -b $(OUTPUT_ISO)`"; \
+		echo $$VERIFY; \
+		if [ "$$VERIFY" != "$(VERIFY_STRING)" ]; then \
+			exit 1; \
+		fi
+endif
+	$(_v)$(BSDTAR) -t -v -f $(OUTPUT_ISO)
 
 clean-download:
 	$(_v)if [ "$(DOWNLOADDIR)" != "/" ]; then $(RM) -rf $(DOWNLOADDIR); fi
