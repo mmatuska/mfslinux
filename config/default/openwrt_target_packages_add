@@ -24,3 +24,15 @@ kmod-lib-zlib-inflate_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-fs-isofs_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-fs-vfat_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-fuse_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-md-mod_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-md-raid0_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-md-raid1_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-md-raid10_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-usb-core_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-usb-ehci_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-usb2_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-input-evdev_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-hid_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-hid-generic_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-usb-hid_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-usb-storage_%%KERNEL_VERSION%%-1_x86_64.ipk
