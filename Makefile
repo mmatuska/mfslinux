@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2018 Martin Matuska <mm at FreeBSD.org>
 #
-MFSLINUX_VERSION?=	0.1.2
+MFSLINUX_VERSION?=	0.1.3
 
 GZIP?=		$(shell which gzip)
 MKDIR?=		$(shell which mkdir)
