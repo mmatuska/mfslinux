@@ -4,9 +4,6 @@
 #
 MFSLINUX_VERSION?=	0.1.2
 
-MOUNT?=		$(shell which mount)
-UMOUNT?=	$(shell which umount)
-LOSETUP?=	$(shell which losetup)
 GZIP?=		$(shell which gzip)
 MKDIR?=		$(shell which mkdir)
 RMDIR?=		$(shell which rmdir)
@@ -33,7 +30,6 @@ BUILD_OS?=	$(shell uname)
 ifeq ($(BUILD_OS),FreeBSD)
 WGET?=		$(shell which fetch)
 WGET_ARGS?=	-q
-MDCONFIG?=	$(shell which mdconfig)
 OPKG_CL?=	$(shell which opkg-cl)
 else
 WGET?=		$(shell which wget)
@@ -52,14 +48,13 @@ OPENWRT_IMGDIR?=	$(WRKDIR)/openwrt_root_img
 
 OPENWRT_TARGET_URL=	https://downloads.openwrt.org/releases/18.06.0/targets/x86/64/
 OPENWRT_PACKAGES_URL=	http://downloads.openwrt.org/releases/18.06.0/packages/x86_64/
-OPENWRT_ROOTFS_IMAGE=	openwrt-18.06.0-x86-64-rootfs-ext4.img
+OPENWRT_ROOTFS_TAR=	openwrt-18.06.0-x86-64-generic-rootfs.tar.gz
 OPENWRT_KERNEL=		openwrt-18.06.0-x86-64-vmlinuz
 OPENWRT_KERNEL_VERSION=	4.14.54
 
 OPENWRT_PACKAGES_REMOVE?=	$(CONFIGDIR)/openwrt_packages_remove
 OPENWRT_PACKAGES_ADD?=		$(CONFIGDIR)/openwrt_packages_add
 OPENWRT_TARGET_PACKAGES_ADD?=	$(CONFIGDIR)/openwrt_target_packages_add
-OPENWRT_ROOT_TAR?=	$(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE).tar
 
 CONFIGFILES=	network system
 ISOLINUX_CFG=	$(ISOLINUXDIR)/isolinux.cfg
@@ -102,7 +97,7 @@ VERIFY_STRING=	ISO 9660 CD-ROM filesystem data '$(OUTPUT_ISO_LABEL)' (bootable)
 
 all: iso
 
-download: $(DOWNLOADDIR) download_kernel download_rootfs_image
+download: $(DOWNLOADDIR) download_kernel download_rootfs_tar
 
 $(WRKDIR):
 	$(_v)$(MKDIR) -p $(WRKDIR)
@@ -111,65 +106,28 @@ $(DOWNLOADDIR):
 	$(_v)$(MKDIR) -p $(DOWNLOADDIR)
 
 download_kernel: $(DOWNLOADDIR) $(DOWNLOADDIR)/$(OPENWRT_KERNEL)
-
-download_rootfs_image: $(DOWNLOADDIR) $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE)
-
 $(DOWNLOADDIR)/$(OPENWRT_KERNEL):
 	$(_v)echo "Downloading OpenWRT kernel"
 	$(_v)cd $(DOWNLOADDIR) && $(WGET) $(WGET_ARGS) \
 		$(OPENWRT_TARGET_URL)/$(OPENWRT_KERNEL)
 
-# Download and extract rootfs image
-$(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE):
-	$(_v)echo "Downloading OpenWRT rootfs image"
+download_rootfs_tar: $(DOWNLOADDIR) $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_TAR)
+$(DOWNLOADDIR)/$(OPENWRT_ROOTFS_TAR):
+	$(_v)echo "Downloading OpenWRT rootfs"
 	$(_v)cd $(DOWNLOADDIR) && $(WGET) $(WGET_ARGS) \
-		$(OPENWRT_TARGET_URL)/$(OPENWRT_ROOTFS_IMAGE).gz
-	$(_v)echo "Extracting OpenWRT rootfs image"
-	$(_v)cd $(DOWNLOADDIR) && $(GZIP) -d $(OPENWRT_ROOTFS_IMAGE).gz
+		$(OPENWRT_TARGET_URL)/$(OPENWRT_ROOTFS_TAR)
 
-# Mount rootfs image
-create_rootfs_tar: $(OPENWRT_ROOT_TAR)
-
-$(OPENWRT_ROOT_TAR):
-	$(_v)echo "Building openwrt root tar from image file"
-	$(_v)$(MKDIR) -p $(OPENWRT_IMGDIR)
-ifeq ($(BUILD_OS),FreeBSD)
-	$(_v)if ! $(MDCONFIG) -l -f $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE) > /dev/null; then \
-	 $(MDCONFIG) -a -t vnode -f $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE); \
-	 fi
-	$(_v)LOOPDEV=`$(MDCONFIG) -l -f $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE) | $(HEAD) -1`; \
-	 if ! $(MOUNT) | $(GREP) $$LOOPDEV > /dev/null; then \
-	 $(MOUNT) -t ext2fs -o ro /dev/$$LOOPDEV $(OPENWRT_IMGDIR); \
-	 fi
-else
-	$(_v)if ! $(LOSETUP) -j $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE) | $(GREP) $(OPENWRT_ROOTFS_IMAGE) > /dev/null; then \
-	 $(LOSETUP) -f $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE); \
-	 fi
-	$(_v)LOOPDEV=`$(LOSETUP) -j $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE) | $(HEAD) -1 | $(AWK) -F: '{ print $$1 }'`; \
-	 if ! $(MOUNT) | $(GREP) $$LOOPDEV > /dev/null; then \
-	 $(MOUNT) -o loop,ro $$LOOPDEV $(OPENWRT_IMGDIR); \
-	 fi
-endif
-	$(_v)$(TAR) -c -f $(OPENWRT_ROOT_TAR) -C $(OPENWRT_IMGDIR) .
-	$(_v)$(UMOUNT) $(OPENWRT_IMGDIR)
-	$(_v)$(RMDIR) $(OPENWRT_IMGDIR)
-ifeq ($(BUILD_OS),FreeBSD)
-	$(_v)LOOPDEV=`$(MDCONFIG) -l -f $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE) | $(HEAD) -1`; \
-	 $(MDCONFIG) -d -u $$LOOPDEV
-else
-	$(_v)LOOPDEV=`$(LOSETUP) -j $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_IMAGE) | $(HEAD) -1 | $(AWK) -F: '{ print $$1 }'`; \
-	 $(LOSETUP) -d $$LOOPDEV
-endif
-
-extract_rootfs: create_rootfs_tar $(OPENWRT_ROOTDIR)/init
-
-$(OPENWRT_ROOTDIR)/init:
+extract_rootfs_tar: $(WRKDIR)/.extract_rootfs_tar_done
+$(WRKDIR)/.extract_rootfs_tar_done:
 	$(_v)$(MKDIR) -p $(OPENWRT_ROOTDIR)
-	$(_v)$(TAR) -x -f $(OPENWRT_ROOT_TAR) -C $(OPENWRT_ROOTDIR)
+	$(_v)$(TAR) -x -f $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_TAR) -C $(OPENWRT_ROOTDIR)
+	$(_v)$(TOUCH) $(WRKDIR)/.extract_rootfs_tar_done
+
+deploy_init: $(OPENWRT_ROOTDIR)/init
+$(OPENWRT_ROOTDIR)/init:
 	$(_v)$(CP) $(OPENWRT_ROOTDIR)/sbin/init $(OPENWRT_ROOTDIR)/init
 
 set_root_pw: $(WRKDIR)/.set_root_pw_done
-
 $(WRKDIR)/.set_root_pw_done:
 	$(_v)echo "Setting root password"
 	$(_v)ROOTPW_HASH=`$(OPENSSL) passwd -1 $(ROOTPW)`; \
@@ -177,7 +135,6 @@ $(WRKDIR)/.set_root_pw_done:
 	$(_v)$(TOUCH) $(WRKDIR)/.set_root_pw_done
 
 set_root_shell: $(WRKDIR)/.set_root_shell_done
-
 $(WRKDIR)/.set_root_shell_done:
 	$(_v)if [ -n "$(ROOT_SHELL)" ]; then \
 	echo "Setting root shell"; \
@@ -186,7 +143,6 @@ $(WRKDIR)/.set_root_shell_done:
 	fi
 
 remove_packages: $(WRKDIR)/.remove_packages_done
-
 $(WRKDIR)/.remove_packages_done:
 	$(_v)echo "Removing packages"
 	$(_v)$(MKDIR) -p $(OPENWRT_ROOTDIR)/tmp/lock
@@ -229,7 +185,6 @@ download_packages:
 	done
 
 add_packages: download_packages $(WRKDIR)/.add_packages_done
-
 $(WRKDIR)/.add_packages_done:
 	$(_v)$(MKDIR) -p $(OPENWRT_ROOTDIR)/packages
 	$(_v)if [ -f $(OPENWRT_TARGET_PACKAGES_ADD) ]; then \
@@ -254,7 +209,6 @@ $(WRKDIR)/.add_packages_done:
 	$(_v)$(TOUCH) $(WRKDIR)/.add_packages_done
 
 copy_configuration_files: $(WRKDIR)/.copy_configuration_files_done
-
 $(WRKDIR)/.copy_configuration_files_done:
 	$(_v)echo "Coypying configuration files"
 	$(_v)for file in $(CONFIGFILES); do \
@@ -270,7 +224,6 @@ $(WRKDIR)/.copy_configuration_files_done:
 	$(_v)$(TOUCH) $(WRKDIR)/.copy_configuration_files_done
 
 host_key: $(WRKDIR)/.host_key_done
-
 $(WRKDIR)/.host_key_done:
 	$(_v)if [ -f $(CONFIGDIR)/dropbear_rsa_host_key ]; then \
 	echo "Installing dropbear_rsa_host_key"; \
@@ -280,7 +233,6 @@ $(WRKDIR)/.host_key_done:
 	$(_v)$(TOUCH) $(WRKDIR)/.host_key_done
 
 banner: $(WRKDIR)/.banner_done
-
 $(WRKDIR)/.banner_done:
 	$(_v)echo "Appending mfslinux info to OpenWRT banner"
 	$(_v)echo " mfslinux $(MFSLINUX_VERSION) $(GIT_REVISION)" >> $(OPENWRT_ROOTDIR)/etc/banner
@@ -288,20 +240,25 @@ $(WRKDIR)/.banner_done:
 		$(OPENWRT_ROOTDIR)/etc/banner
 	$(_v)$(TOUCH) $(WRKDIR)/.banner_done
 
+authorized_keys: $(WRKDIR)/.authorized_keys_done
+$(WRKDIR)/.authorized_keys_done:
+	$(_v)if [ -f "$(CONFIGDIR)/authorized_keys" ]; then \
+		$(CP) $(CONFIGDIR)/authorized_keys $(OPENWRT_ROOTDIR)/etc/dropbear/authorized_keys; \
+	fi
+	$(_v)$(TOUCH) $(WRKDIR)/.authorized_keys_done
+
 $(ISODIR)/isolinux/initramfs.igz: 
 	$(_v)echo "Generating initramfs"
 	$(_v)$(MKDIR) -p $(ISODIR)/isolinux
 	$(_v)cd $(WRKDIR)/openwrt_root && $(FIND) . | $(CPIO) -H newc -o | $(GZIP) > $(ISODIR)/isolinux/initramfs.igz
 
 copy_kernel: download_kernel $(ISODIR)/isolinux/vmlinuz
-
 $(ISODIR)/isolinux/vmlinuz:
 	$(_v)echo "Copying kernel"
 	$(_v)$(MKDIR) -p $(ISODIR)/isolinux
 	$(_v)$(CP) $(DOWNLOADDIR)/$(OPENWRT_KERNEL) $(ISODIR)/isolinux/vmlinuz
 
 copy_isolinux_files: $(WRKDIR)/.copy_isolinux_files_done
-
 $(WRKDIR)/.copy_isolinux_files_done:
 	$(_v)echo "Copying isolinux files"
 	$(_v)for file in $(ISOLINUX_FILES); do \
@@ -311,12 +268,11 @@ $(WRKDIR)/.copy_isolinux_files_done:
 	$(_v)$(CP) -f $(ISOLINUX_BOOTTXT) $(ISODIR)/isolinux/boot.txt
 	$(_v)$(TOUCH) $(WRKDIR)/.copy_isolinux_files_done
 
-customize_rootfs: remove_packages add_packages copy_configuration_files set_root_pw set_root_shell host_key banner
+customize_rootfs: deploy_init remove_packages add_packages copy_configuration_files set_root_pw set_root_shell host_key banner authorized_keys
 
-generate_initramfs: download_rootfs_image extract_rootfs customize_rootfs $(ISODIR)/isolinux/initramfs.igz
+generate_initramfs: download_rootfs_tar extract_rootfs_tar customize_rootfs $(ISODIR)/isolinux/initramfs.igz
 
 iso: generate_initramfs copy_kernel copy_isolinux_files $(OUTPUT_ISO)
-
 $(OUTPUT_ISO):
 	$(_v)echo "Generating $(OUTPUT_ISO)"
 	$(_v)if [ "$(MKISOFS)" = "" ]; then echo "Error: mkisofs or genisoimage missing"; exit 1; fi
