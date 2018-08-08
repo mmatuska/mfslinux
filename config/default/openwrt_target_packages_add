@@ -23,3 +23,4 @@ kmod-nls-utf8_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-lib-zlib-inflate_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-fs-isofs_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-fs-vfat_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-fuse_%%KERNEL_VERSION%%-1_x86_64.ipk

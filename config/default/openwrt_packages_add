@@ -38,3 +38,7 @@ packages/lvm2_2.02.177-1_x86_64.ipk
 packages/libwrap_7.6-1_x86_64.ipk
 packages/nfs-utils_2.3.1-1_x86_64.ipk
 packages/dosfstools_4.1-1_x86_64.ipk
+packages/ntfs-3g_2017.3.23-1-fuseint_x86_64.ipk
+packages/libgpg-error_1.12-1_x86_64.ipk
+packages/libgcrypt_1.6.6-2_x86_64.ipk
+packages/ntfs-3g-utils_2017.3.23-1-fuseint_x86_64.ipk
