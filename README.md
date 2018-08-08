@@ -10,7 +10,7 @@ This is a GNU Makefile with a set of scripts and configuration files that
 generates a bootable ISO file with a working Linux distribution.
 This minimal distribution gets completely loaded into memory.
 
-mfslinux is currently based on [OpenWRT](https://openwrt.org)
+mfslinux is currently based on [OpenWrt](https://openwrt.org)
 
 ## Build-time requirements
  - x86_64 Linux or FreeBSD amd64

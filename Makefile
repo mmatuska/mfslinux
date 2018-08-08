@@ -107,13 +107,13 @@ $(DOWNLOADDIR):
 
 download_kernel: $(DOWNLOADDIR) $(DOWNLOADDIR)/$(OPENWRT_KERNEL)
 $(DOWNLOADDIR)/$(OPENWRT_KERNEL):
-	$(_v)echo "Downloading OpenWRT kernel"
+	$(_v)echo "Downloading OpenWrt kernel"
 	$(_v)cd $(DOWNLOADDIR) && $(WGET) $(WGET_ARGS) \
 		$(OPENWRT_TARGET_URL)/$(OPENWRT_KERNEL)
 
 download_rootfs_tar: $(DOWNLOADDIR) $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_TAR)
 $(DOWNLOADDIR)/$(OPENWRT_ROOTFS_TAR):
-	$(_v)echo "Downloading OpenWRT rootfs"
+	$(_v)echo "Downloading OpenWrt rootfs"
 	$(_v)cd $(DOWNLOADDIR) && $(WGET) $(WGET_ARGS) \
 		$(OPENWRT_TARGET_URL)/$(OPENWRT_ROOTFS_TAR)
 
@@ -234,7 +234,7 @@ $(WRKDIR)/.host_key_done:
 
 banner: $(WRKDIR)/.banner_done
 $(WRKDIR)/.banner_done:
-	$(_v)echo "Appending mfslinux info to OpenWRT banner"
+	$(_v)echo "Appending mfslinux info to OpenWrt banner"
 	$(_v)echo " mfslinux $(MFSLINUX_VERSION) $(GIT_REVISION)" >> $(OPENWRT_ROOTDIR)/etc/banner
 	$(_v)echo " -----------------------------------------------------" >> \
 		$(OPENWRT_ROOTDIR)/etc/banner
