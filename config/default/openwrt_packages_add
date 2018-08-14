@@ -10,6 +10,7 @@ base/libfdisk_2.32-2_x86_64.ipk
 base/libmount_2.32-2_x86_64.ipk
 base/fdisk_2.32-2_x86_64.ipk
 base/cfdisk_2.32-2_x86_64.ipk
+base/sfdisk_2.32-2_x86_64.ipk
 base/libevent2_2.0.22-1_x86_64.ipk
 base/libpopt_1.16-1_x86_64.ipk
 base/libpcap_1.8.1-1_x86_64.ipk
@@ -62,3 +63,6 @@ packages/xz_5.2.4-1_x86_64.ipk
 packages/tar_1.30-1_x86_64.ipk
 packages/nano_2.9.8-1_x86_64.ipk
 packages/vim_8.0.586-2_x86_64.ipk
+packages/gdisk_1.0.3-1_x86_64.ipk
+packages/cgdisk_1.0.3-1_x86_64.ipk
+packages/sgdisk_1.0.3-1_x86_64.ipk
