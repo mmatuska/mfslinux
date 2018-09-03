@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2018 Martin Matuska <mm at FreeBSD.org>
 #
-MFSLINUX_VERSION?=	0.1.3
+MFSLINUX_VERSION?=	0.1.4
 
 GZIP?=		$(shell which gzip)
 MKDIR?=		$(shell which mkdir)
@@ -46,11 +46,12 @@ ISODIR?=	$(WRKDIR)/iso
 OPENWRT_ROOTDIR?=	$(WRKDIR)/openwrt_root
 OPENWRT_IMGDIR?=	$(WRKDIR)/openwrt_root_img
 
-OPENWRT_TARGET_URL=	https://downloads.openwrt.org/releases/18.06.0/targets/x86/64/
-OPENWRT_PACKAGES_URL=	http://downloads.openwrt.org/releases/18.06.0/packages/x86_64/
-OPENWRT_ROOTFS_TAR=	openwrt-18.06.0-x86-64-generic-rootfs.tar.gz
-OPENWRT_KERNEL=		openwrt-18.06.0-x86-64-vmlinuz
-OPENWRT_KERNEL_VERSION=	4.14.54
+OPENWRT_VERSION=	18.06.1
+OPENWRT_KERNEL_VERSION=	4.14.63
+OPENWRT_TARGET_URL=	https://downloads.openwrt.org/releases/$(OPENWRT_VERSION)/targets/x86/64/
+OPENWRT_PACKAGES_URL=	http://downloads.openwrt.org/releases/$(OPENWRT_VERSION)/packages/x86_64/
+OPENWRT_ROOTFS_TAR=	openwrt-$(OPENWRT_VERSION)-x86-64-generic-rootfs.tar.gz
+OPENWRT_KERNEL=		openwrt-$(OPENWRT_VERSION)-x86-64-vmlinuz
 
 OPENWRT_PACKAGES_REMOVE?=	$(CONFIGDIR)/openwrt_packages_remove
 OPENWRT_PACKAGES_ADD?=		$(CONFIGDIR)/openwrt_packages_add
@@ -265,7 +266,9 @@ $(WRKDIR)/.copy_isolinux_files_done:
 	$(CP) -f $(ISOLINUXDIR)/$$file $(ISODIR)/isolinux/$$file; \
 	 done
 	$(_v)$(CP) -f $(ISOLINUX_CFG) $(ISODIR)/isolinux/isolinux.cfg
-	$(_v)$(CP) -f $(ISOLINUX_BOOTTXT) $(ISODIR)/isolinux/boot.txt
+	$(_v)$(SED) -e "s,%%MFSLINUX_VERSION%%,$(MFSLINUX_VERSION) $(GIT_REVISION),g" \
+   		-e "s,%%OPENWRT_VERSION%%,$(OPENWRT_VERSION),g" \
+		$(ISOLINUX_BOOTTXT) > $(ISODIR)/isolinux/boot.txt
 	$(_v)$(TOUCH) $(WRKDIR)/.copy_isolinux_files_done
 
 customize_rootfs: deploy_init remove_packages add_packages copy_configuration_files set_root_pw set_root_shell host_key banner authorized_keys

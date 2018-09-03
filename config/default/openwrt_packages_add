@@ -3,8 +3,8 @@ base/terminfo_6.1-1_x86_64.ipk
 base/libreadline_7.0-1_x86_64.ipk
 base/libncurses_6.1-1_x86_64.ipk
 base/zlib_1.2.11-2_x86_64.ipk
-base/libopenssl_1.0.2o-1_x86_64.ipk
-base/libustream-openssl_2018-04-30-527e7002-3_x86_64.ipk
+base/libopenssl_1.0.2p-1_x86_64.ipk
+base/libustream-openssl_2018-05-22-5322f9db-1_x86_64.ipk
 base/ca-certificates_20180409_all.ipk
 base/libfdisk_2.32-2_x86_64.ipk
 base/libmount_2.32-2_x86_64.ipk
@@ -20,8 +20,8 @@ base/xfs-growfs_4.11.0-2_x86_64.ipk
 base/xfs-fsck_4.11.0-2_x86_64.ipk
 base/xfs-admin_4.11.0-2_x86_64.ipk
 base/librpc_2015-11-04-a921e3de-1_x86_64.ipk
-base/libbz2_1.0.6-3_x86_64.ipk
-base/bzip2_1.0.6-3_x86_64.ipk
+base/libbz2_1.0.6-4_x86_64.ipk
+base/bzip2_1.0.6-4_x86_64.ipk
 base/uuidgen_2.32-2_x86_64.ipk
 base/mdadm_4.0-4_x86_64.ipk
 base/losetup_2.32-2_x86_64.ipk

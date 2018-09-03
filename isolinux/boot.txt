@@ -1,4 +1,4 @@
-mfslinux
+mfslinux %%MFSLINUX_VERSION%%
 Copyright (c) 2018 Martin Matuska <mm at FreeBSD.org>
 
-a - Boot mfslinux
+a - Boot mfslinux (OpenWrt %%OPENWRT_VERSION%%)
