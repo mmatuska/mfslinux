@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2018 Martin Matuska <mm at FreeBSD.org>
 #
-MFSLINUX_VERSION?=	0.1.4
+MFSLINUX_VERSION?=	0.1.5
 
 GZIP?=		$(shell which gzip)
 MKDIR?=		$(shell which mkdir)
@@ -46,8 +46,8 @@ ISODIR?=	$(WRKDIR)/iso
 OPENWRT_ROOTDIR?=	$(WRKDIR)/openwrt_root
 OPENWRT_IMGDIR?=	$(WRKDIR)/openwrt_root_img
 
-OPENWRT_VERSION=	18.06.1
-OPENWRT_KERNEL_VERSION=	4.14.63
+OPENWRT_VERSION=	18.06.2
+OPENWRT_KERNEL_VERSION=	4.14.95
 OPENWRT_TARGET_URL=	https://downloads.openwrt.org/releases/$(OPENWRT_VERSION)/targets/x86/64/
 OPENWRT_PACKAGES_URL=	http://downloads.openwrt.org/releases/$(OPENWRT_VERSION)/packages/x86_64/
 OPENWRT_ROOTFS_TAR=	openwrt-$(OPENWRT_VERSION)-x86-64-generic-rootfs.tar.gz
@@ -169,6 +169,7 @@ download_packages:
 	echo "Downloading: $${PKG}"; \
 	cd $(DOWNLOADDIR) && $(WGET) $(WGET_ARGS) \
 		$(OPENWRT_TARGET_URL)/packages/$${PKG}; \
+	if [ "$$?" != "0" ]; then exit 1; fi; \
 	fi; \
 	done; \
 	if [ -f "$(OPENWRT_PACKAGES_ADD)" ]; then \
@@ -182,6 +183,7 @@ download_packages:
 	echo "Downloading: $${PKG}"; \
 	cd $(DOWNLOADDIR) && $(WGET) $(WGET_ARGS) \
 		$(OPENWRT_PACKAGES_URL)/$${PKG}; \
+	if [ "$$?" != "0" ]; then exit 1; fi; \
 	fi; \
 	done
 
