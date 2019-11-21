@@ -4,6 +4,9 @@ luci-proto-ppp
 luci-proto-ipv6
 luci-mod-admin-full
 luci-app-firewall
+luci-mod-system
+luci-mod-status
+luci-mod-network
 luci-base
 luci-lib-ip
 luci-lib-jsonc

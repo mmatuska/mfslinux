@@ -1,9 +1,0 @@
-sudo: required
-dist: trusty
-addons:
-  apt:
-    packages:
-      - genisoimage
-      - bsdtar
-script:
-  - sudo make check VERBOSE=1

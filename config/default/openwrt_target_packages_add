@@ -36,4 +36,5 @@ kmod-hid_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-hid-generic_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-usb-hid_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-usb-storage_%%KERNEL_VERSION%%-1_x86_64.ipk
-libstdcpp_7.3.0-1_x86_64.ipk
+libatomic1_7.4.0-2_x86_64.ipk
+libstdcpp6_7.4.0-2_x86_64.ipk

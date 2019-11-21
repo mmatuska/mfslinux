@@ -1,6 +1,6 @@
 # mfslinux build instructions
 
-Copyright (c) 2018 Martin Matuska <mm at FreeBSD.org>
+Copyright (c) 2019 Martin Matuska <mm at FreeBSD.org>
 
 ## Configuration
 Read hints in the default configuration files in the config/default directory.
