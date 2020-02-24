@@ -1,8 +1,8 @@
 # mfslinux
 
-Copyright (c) 2019 Martin Matuska <mm at FreeBSD.org>
+Copyright (c) 2020 Martin Matuska <martin at matuska dot org>
 
-Version 0.1.3
+Version 0.1.7
 
 ## Description
 

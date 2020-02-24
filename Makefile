@@ -1,8 +1,8 @@
 # mfslinux
 #
-# Copyright (c) 2018 Martin Matuska <mm at FreeBSD.org>
+# Copyright (c) 2020 Martin Matuska <mm at matuska dot org>
 #
-MFSLINUX_VERSION?=	0.1.6
+MFSLINUX_VERSION?=	0.1.7
 
 GZIP?=		$(shell which gzip)
 MKDIR?=		$(shell which mkdir)
@@ -20,6 +20,7 @@ CPIO?=		$(shell which cpio)
 OPENSSL?=	$(shell which openssl)
 CHROOT?=	$(shell which chroot)
 TOUCH?=		$(shell which touch)
+LN?=		$(shell which ln)
 GIT?=		$(shell which git)
 MKISOFS?=	$(shell which mkisofs || which genisoimage)
 LS?=		$(shell which ls)
@@ -46,8 +47,8 @@ ISODIR?=	$(WRKDIR)/iso
 OPENWRT_ROOTDIR?=	$(WRKDIR)/openwrt_root
 OPENWRT_IMGDIR?=	$(WRKDIR)/openwrt_root_img
 
-OPENWRT_VERSION=	19.07.0-rc1
-OPENWRT_KERNEL_VERSION=	4.14.151
+OPENWRT_VERSION=	19.07.1
+OPENWRT_KERNEL_VERSION=	4.14.167
 OPENWRT_TARGET_URL=	https://downloads.openwrt.org/releases/$(OPENWRT_VERSION)/targets/x86/64/
 OPENWRT_PACKAGES_URL=	http://downloads.openwrt.org/releases/$(OPENWRT_VERSION)/packages/x86_64/
 OPENWRT_ROOTFS_TAR=	openwrt-$(OPENWRT_VERSION)-x86-64-generic-rootfs.tar.gz
@@ -68,6 +69,7 @@ ROOT_SHELL?=	/bin/bash
 GIT_REVISION=	$(shell $(GIT) rev-parse --short HEAD)
 
 OUTPUT_ISO?=	mfslinux-$(MFSLINUX_VERSION)-$(GIT_REVISION).iso
+ARTIFACT?=	mfslinux.iso
 OUTPUT_ISO_LABEL?=	mfslinux
 
 VERBOSE?=	0
@@ -295,11 +297,16 @@ check: iso
 		fi
 	$(_v)$(BSDTAR) -t -v -f $(OUTPUT_ISO)
 
+artifact: iso $(ARTIFACT)
+$(ARTIFACT): $(OUTPUT_ISO)
+	$(_v)echo Symlinking ISO file
+	$(_v)$(LN) -s $(OUTPUT_ISO) $(ARTIFACT)
+
 clean-download:
 	$(_v)if [ "$(DOWNLOADDIR)" != "/" ]; then $(RM) -rf $(DOWNLOADDIR); fi
 
 clean:
 	$(_v)if [ "$(WRKDIR)" != "/" ]; then $(RM) -rf $(WRKDIR); fi
-	$(_v)$(RM) -f $(OUTPUT_ISO)
+	$(_v)$(RM) -f $(OUTPUT_ISO) $(ARTIFACT)
 
 clean-all: clean clean-download
