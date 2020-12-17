@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2020 Martin Matuska <mm at matuska dot org>
 #
-MFSLINUX_VERSION?=	0.1.7
+MFSLINUX_VERSION?=	0.1.8
 
 GZIP?=		$(shell which gzip)
 MKDIR?=		$(shell which mkdir)
@@ -47,8 +47,8 @@ ISODIR?=	$(WRKDIR)/iso
 OPENWRT_ROOTDIR?=	$(WRKDIR)/openwrt_root
 OPENWRT_IMGDIR?=	$(WRKDIR)/openwrt_root_img
 
-OPENWRT_VERSION=	19.07.1
-OPENWRT_KERNEL_VERSION=	4.14.167
+OPENWRT_VERSION=	19.07.5
+OPENWRT_KERNEL_VERSION=	4.14.209
 OPENWRT_TARGET_URL=	https://downloads.openwrt.org/releases/$(OPENWRT_VERSION)/targets/x86/64/
 OPENWRT_PACKAGES_URL=	http://downloads.openwrt.org/releases/$(OPENWRT_VERSION)/packages/x86_64/
 OPENWRT_ROOTFS_TAR=	openwrt-$(OPENWRT_VERSION)-x86-64-generic-rootfs.tar.gz
