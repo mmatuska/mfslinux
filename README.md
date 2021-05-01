@@ -1,6 +1,6 @@
 # mfslinux
 
-Copyright (c) 2020 Martin Matuska <martin at matuska dot org>
+Copyright (c) 2021 Martin Matuska <martin at matuska dot org>
 
 Version 0.1.8
 

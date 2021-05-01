@@ -1,8 +1,8 @@
 # mfslinux
 #
-# Copyright (c) 2020 Martin Matuska <mm at matuska dot org>
+# Copyright (c) 2021 Martin Matuska <mm at matuska dot org>
 #
-MFSLINUX_VERSION?=	0.1.8
+MFSLINUX_VERSION?=	0.1.9
 
 GZIP?=		$(shell which gzip)
 MKDIR?=		$(shell which mkdir)
@@ -47,12 +47,12 @@ ISODIR?=	$(WRKDIR)/iso
 OPENWRT_ROOTDIR?=	$(WRKDIR)/openwrt_root
 OPENWRT_IMGDIR?=	$(WRKDIR)/openwrt_root_img
 
-OPENWRT_VERSION=	19.07.5
-OPENWRT_KERNEL_VERSION=	4.14.209
+OPENWRT_VERSION=	21.02.0-rc1
+OPENWRT_KERNEL_VERSION=	5.4.111
 OPENWRT_TARGET_URL=	https://downloads.openwrt.org/releases/$(OPENWRT_VERSION)/targets/x86/64/
 OPENWRT_PACKAGES_URL=	http://downloads.openwrt.org/releases/$(OPENWRT_VERSION)/packages/x86_64/
-OPENWRT_ROOTFS_TAR=	openwrt-$(OPENWRT_VERSION)-x86-64-generic-rootfs.tar.gz
-OPENWRT_KERNEL=		openwrt-$(OPENWRT_VERSION)-x86-64-vmlinuz
+OPENWRT_ROOTFS_TAR=	openwrt-$(OPENWRT_VERSION)-x86-64-rootfs.tar.gz
+OPENWRT_KERNEL=		openwrt-$(OPENWRT_VERSION)-x86-64-generic-kernel.bin
 
 OPENWRT_PACKAGES_REMOVE?=	$(CONFIGDIR)/openwrt_packages_remove
 OPENWRT_PACKAGES_ADD?=		$(CONFIGDIR)/openwrt_packages_add

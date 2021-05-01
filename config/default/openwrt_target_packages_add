@@ -42,8 +42,7 @@ kmod-crypto-hmac_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-crypto-sha256_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-crypto-rng_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-crypto-wq_%%KERNEL_VERSION%%-1_x86_64.ipk
-kmod-crypto-iv_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-crypto-misc_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-crypto-user_%%KERNEL_VERSION%%-1_x86_64.ipk
-libatomic1_7.5.0-2_x86_64.ipk
-libstdcpp6_7.5.0-2_x86_64.ipk
+libatomic1_8.4.0-3_x86_64.ipk
+libstdcpp6_8.4.0-3_x86_64.ipk

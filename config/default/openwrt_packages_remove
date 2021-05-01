@@ -8,6 +8,7 @@ luci-mod-system
 luci-mod-status
 luci-mod-network
 luci-base
+luci-lib-base
 luci-lib-ip
 luci-lib-jsonc
 luci-lib-nixio
@@ -16,3 +17,5 @@ uhttpd-mod-ubus
 uhttpd
 liblucihttp-lua
 liblucihttp
+libustream-wolfssl20201210
+libwolfssl4.7.0.66253b90
