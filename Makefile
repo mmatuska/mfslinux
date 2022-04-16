@@ -1,8 +1,8 @@
 # mfslinux
 #
-# Copyright (c) 2021 Martin Matuska <mm at matuska dot org>
+# Copyright (c) 2022 Martin Matuska <mm at matuska dot de>
 #
-MFSLINUX_VERSION?=	0.1.9
+MFSLINUX_VERSION?=	0.1.10
 
 GZIP?=		$(shell which gzip)
 MKDIR?=		$(shell which mkdir)
@@ -47,8 +47,8 @@ ISODIR?=	$(WRKDIR)/iso
 OPENWRT_ROOTDIR?=	$(WRKDIR)/openwrt_root
 OPENWRT_IMGDIR?=	$(WRKDIR)/openwrt_root_img
 
-OPENWRT_VERSION=	21.02.0-rc1
-OPENWRT_KERNEL_VERSION=	5.4.111
+OPENWRT_VERSION=	21.02.2
+OPENWRT_KERNEL_VERSION=	5.4.179
 OPENWRT_TARGET_URL=	https://downloads.openwrt.org/releases/$(OPENWRT_VERSION)/targets/x86/64/
 OPENWRT_PACKAGES_URL=	http://downloads.openwrt.org/releases/$(OPENWRT_VERSION)/packages/x86_64/
 OPENWRT_ROOTFS_TAR=	openwrt-$(OPENWRT_VERSION)-x86-64-rootfs.tar.gz

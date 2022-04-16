@@ -44,5 +44,16 @@ kmod-crypto-rng_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-crypto-wq_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-crypto-misc_%%KERNEL_VERSION%%-1_x86_64.ipk
 kmod-crypto-user_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-mii_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-pps_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-ptp_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-e1000_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-e1000e_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-libphy_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-phy-bcm84881_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-phylib-broadcom_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-phy-broadcom_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-phy-realtek_%%KERNEL_VERSION%%-1_x86_64.ipk
+kmod-vmxnet3_%%KERNEL_VERSION%%-1_x86_64.ipk
 libatomic1_8.4.0-3_x86_64.ipk
 libstdcpp6_8.4.0-3_x86_64.ipk
