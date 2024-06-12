@@ -1,4 +1,4 @@
 mfslinux %%MFSLINUX_VERSION%%
-Copyright (c) 2022 Martin Matuska <mm at matuska dot de>
+Copyright (c) 2024 Martin Matuska <mm at matuska dot de>
 
 a - Boot mfslinux (OpenWrt %%OPENWRT_VERSION%%)

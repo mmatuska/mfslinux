@@ -1,5 +1,6 @@
 luci-ssl
 luci
+luci-light
 luci-theme-bootstrap
 luci-proto-ppp
 luci-proto-ipv6
@@ -18,5 +19,5 @@ uhttpd-mod-ubus
 uhttpd
 liblucihttp-lua
 liblucihttp
-libustream-wolfssl20201210
-libwolfssl4.7.0.66253b90
+libustream-mbedtls20201210
+px5g-mbedtls
