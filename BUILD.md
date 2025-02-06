@@ -1,6 +1,6 @@
 # mfslinux build instructions
 
-Copyright (c) 2024 Martin Matuska <mm at matuska dot de>
+Copyright (c) 2025 Martin Matuska <mm at matuska dot de>
 
 ## Configuration
 Read hints in the default configuration files in the config/default directory.

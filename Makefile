@@ -1,6 +1,6 @@
 # mfslinux
 #
-# Copyright (c) 2024 Martin Matuska <mm at matuska dot de>
+# Copyright (c) 2025 Martin Matuska <mm at matuska dot de>
 #
 MFSLINUX_VERSION?=	0.1.12
 
