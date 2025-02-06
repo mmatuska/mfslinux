@@ -15,7 +15,7 @@ jobs:
         run: sudo make check VERBOSE=1
       - name: Create artifact
         run: make artifact VERBOSE=1
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@master
         with:
           name: mfslinux-${{ github.sha }}
           path: mfslinux.iso
