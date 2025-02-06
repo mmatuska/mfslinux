@@ -9,6 +9,7 @@ luci-app-firewall
 luci-mod-system
 luci-mod-status
 luci-mod-network
+luci-app-package-manager
 luci-base
 luci-lib-base
 luci-lib-ip

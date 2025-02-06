@@ -2,7 +2,7 @@
 
 Copyright (c) 2024 Martin Matuska <martin at matuska dot de>
 
-Version 0.1.11
+Version 0.1.12
 
 ## Description
 

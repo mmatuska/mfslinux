@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2024 Martin Matuska <mm at matuska dot de>
 #
-MFSLINUX_VERSION?=	0.1.11
+MFSLINUX_VERSION?=	0.1.12
 
 GZIP?=		$(shell which gzip)
 MKDIR?=		$(shell which mkdir)
@@ -47,15 +47,18 @@ ISODIR?=	$(WRKDIR)/iso
 OPENWRT_ROOTDIR?=	$(WRKDIR)/openwrt_root
 OPENWRT_IMGDIR?=	$(WRKDIR)/openwrt_root_img
 
-OPENWRT_VERSION=	23.05.3
-OPENWRT_KERNEL_VERSION=	5.15.150
+OPENWRT_VERSION=	24.10.0
+OPENWRT_KERNEL_VERSION=	6.6.73-r1
+OPENWRT_KERNEL_DIR=	6.6.73-1-a21259e4f338051d27a6443a3a7f7f1f
 OPENWRT_TARGET_URL=	https://downloads.openwrt.org/releases/$(OPENWRT_VERSION)/targets/x86/64/
-OPENWRT_PACKAGES_URL=	http://downloads.openwrt.org/releases/$(OPENWRT_VERSION)/packages/x86_64/
+OPENWRT_PACKAGES_URL=	https://downloads.openwrt.org/releases/$(OPENWRT_VERSION)/packages/x86_64/
+OPENWRT_KMOD_URL=	https://downloads.openwrt.org/releases/$(OPENWRT_VERSION)/targets/x86/64/kmods/$(OPENWRT_KERNEL_DIR)
 OPENWRT_ROOTFS_TAR=	openwrt-$(OPENWRT_VERSION)-x86-64-rootfs.tar.gz
 OPENWRT_KERNEL=		openwrt-$(OPENWRT_VERSION)-x86-64-generic-kernel.bin
 
 OPENWRT_PACKAGES_REMOVE?=	$(CONFIGDIR)/openwrt_packages_remove
 OPENWRT_PACKAGES_ADD?=		$(CONFIGDIR)/openwrt_packages_add
+OPENWRT_KMOD_PACKAGES_ADD?=	$(CONFIGDIR)/openwrt_kmod_packages_add
 OPENWRT_TARGET_PACKAGES_ADD?=	$(CONFIGDIR)/openwrt_target_packages_add
 
 CONFIGFILES=	network system
@@ -164,13 +167,26 @@ download_packages:
 	else \
 	  PACKAGES_ADD=`$(CAT) $(CONFIGDIR)/default/openwrt_target_packages_add`; \
 	fi; \
+	for PKG in $$PACKAGES_ADD; do \
+	if [ ! -f $(DOWNLOADDIR)/$${PKG} ]; then \
+	echo "Downloading: $${PKG}"; \
+	cd $(DOWNLOADDIR) && $(WGET) $(WGET_ARGS) \
+		$(OPENWRT_TARGET_URL)/packages/$${PKG}; \
+	if [ "$$?" != "0" ]; then rm -f  $(DOWNLOADDIR)/$${PKG}; exit 1; fi; \
+	fi; \
+	done; \
+	if [ -f "$(OPENWRT_KMOD_PACKAGES_ADD)" ]; then \
+	  PACKAGES_ADD=`$(CAT) $(OPENWRT_KMOD_PACKAGES_ADD)`; \
+	else \
+	  PACKAGES_ADD=`$(CAT) $(CONFIGDIR)/default/openwrt_kmod_packages_add`; \
+	fi; \
 	PACKAGES_ADD=`echo $$PACKAGES_ADD | $(SED) -e \
 	  "s,%%KERNEL_VERSION%%,$(OPENWRT_KERNEL_VERSION),g"`; \
 	for PKG in $$PACKAGES_ADD; do \
 	if [ ! -f $(DOWNLOADDIR)/$${PKG} ]; then \
 	echo "Downloading: $${PKG}"; \
 	cd $(DOWNLOADDIR) && $(WGET) $(WGET_ARGS) \
-		$(OPENWRT_TARGET_URL)/packages/$${PKG}; \
+		$(OPENWRT_KMOD_URL)/$${PKG}; \
 	if [ "$$?" != "0" ]; then rm -f  $(DOWNLOADDIR)/$${PKG}; exit 1; fi; \
 	fi; \
 	done; \
@@ -192,13 +208,18 @@ download_packages:
 add_packages: download_packages $(WRKDIR)/.add_packages_done
 $(WRKDIR)/.add_packages_done:
 	$(_v)$(MKDIR) -p $(OPENWRT_ROOTDIR)/packages
-	$(_v)if [ -f $(OPENWRT_TARGET_PACKAGES_ADD) ]; then \
-	  PACKAGES_ADD=`$(CAT) $(OPENWRT_TARGET_PACKAGES_ADD)`; \
+	$(_v)if [ -f $(OPENWRT_KMOD_PACKAGES_ADD) ]; then \
+	  PACKAGES_ADD=`$(CAT) $(OPENWRT_KMOD_PACKAGES_ADD)`; \
 	else \
-	  PACKAGES_ADD=`$(CAT) $(CONFIGDIR)/default/openwrt_target_packages_add`; \
+	  PACKAGES_ADD=`$(CAT) $(CONFIGDIR)/default/openwrt_kmod_packages_add`; \
 	fi; \
 	PACKAGES_ADD=`echo $$PACKAGES_ADD | $(SED) -e \
 	  "s,%%KERNEL_VERSION%%,$(OPENWRT_KERNEL_VERSION),g"`; \
+	if [ -f $(OPENWRT_TARGET_PACKAGES_ADD) ]; then \
+	  PACKAGES_ADD="$$PACKAGES_ADD `$(CAT) $(OPENWRT_TARGET_PACKAGES_ADD)`"; \
+	else \
+	  PACKAGES_ADD="$$PACKAGES_ADD `$(CAT) $(CONFIGDIR)/default/openwrt_target_packages_add`"; \
+	fi; \
 	if [ -f $(OPENWRT_PACKAGES_ADD) ]; then \
 	  PACKAGES_ADD="$$PACKAGES_ADD `$(CAT) $(OPENWRT_PACKAGES_ADD)`"; \
 	else \
